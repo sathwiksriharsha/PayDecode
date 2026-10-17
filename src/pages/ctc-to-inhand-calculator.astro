@@ -1,0 +1,1256 @@
+---
+/**
+ * CTC to In-Hand Calculator — Main tool page.
+ * Full-featured salary breakdown with editable assumptions.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+import { PROFESSIONAL_TAX, RULES_METADATA } from '../config/statutoryRules';
+
+const title = 'CTC to In-Hand Salary Calculator 2026–27';
+const description = 'Calculate your monthly in-hand salary from CTC for Tax Year 2026–27. Accurate tax, PF (₹25K ceiling), gratuity, and deduction breakdown with editable assumptions. Income-tax Act, 2025 compliant.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/ctc-to-inhand-calculator`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: 'CTC to In-Hand Calculator', item: `${site.url}/ctc-to-inhand-calculator` },
+  ],
+};
+
+const ptStates = Object.entries(PROFESSIONAL_TAX);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/ctc-to-inhand-calculator"
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>CTC to In-Hand Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Input Panel ═══ -->
+      <div class="calc-inputs">
+        <div class="card">
+          <h1 class="display-sm mb-xs">CTC to In-Hand Calculator</h1>
+          <p class="body-sm text-muted mb-xl">
+            Tax Year 2026–27 • Income-tax Act, 2025 • PF ceiling ₹25,000 (from Sep 2026)
+          </p>
+
+          <!-- CTC Input -->
+          <div class="input-group">
+            <label for="ctc-input" class="input-label">
+              Annual CTC
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">Cost to Company — the total annual amount your employer spends on you, including PF, gratuity, and benefits.</span>
+              </span>
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="text"
+                id="ctc-input"
+                class="input input-number"
+                placeholder="e.g. 12,00,000 or 12L"
+                inputmode="decimal"
+                autocomplete="off"
+                value="1200000"
+              />
+            </div>
+            <!-- Range Slider -->
+            <div class="mt-xs">
+              <input type="range" id="ctc-slider" min="300000" max="10000000" step="50000" value="1200000" />
+              <div class="flex justify-between caption text-muted mt-xxs">
+                <span>₹3 LPA</span>
+                <span>₹50 LPA</span>
+                <span>₹1 Cr</span>
+              </div>
+            </div>
+            <!-- Preset Chips -->
+            <div class="preset-chips mt-xs" id="ctc-preset-chips">
+              <button type="button" class="preset-chip" data-val="600000">₹6 LPA</button>
+              <button type="button" class="preset-chip" data-val="1000000">₹10 LPA</button>
+              <button type="button" class="preset-chip active" data-val="1200000">₹12 LPA</button>
+              <button type="button" class="preset-chip" data-val="1800000">₹18 LPA</button>
+              <button type="button" class="preset-chip" data-val="2500000">₹25 LPA</button>
+              <button type="button" class="preset-chip" data-val="5000000">₹50 LPA</button>
+            </div>
+          </div>
+
+          <!-- Basic % -->
+          <div class="input-group">
+            <label for="basic-percent" class="input-label">
+              Basic Salary (% of CTC)
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">Most companies set basic at 40–50% of CTC. A higher basic increases PF but may also change HRA and gratuity.</span>
+              </span>
+            </label>
+            <div class="radio-group">
+              <label class="radio-pill">
+                <input type="radio" name="basic-percent" value="40" checked /> 40%
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="basic-percent" value="50" /> 50%
+              </label>
+              <label class="radio-pill radio-pill-custom">
+                <input type="radio" name="basic-percent" value="custom" />
+                Custom
+                <input type="number" id="basic-custom" class="input-inline" min="10" max="100" placeholder="%" />
+              </label>
+            </div>
+          </div>
+
+          <!-- PF Policy -->
+          <div class="input-group">
+            <label for="pf-policy" class="input-label">
+              PF Policy
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">Statutory ceiling: PF on ₹25,000/month (₹3,000/month each). Full basic: PF on entire basic salary. Varies by employer.</span>
+              </span>
+            </label>
+            <select id="pf-policy" class="input select">
+              <option value="statutory_ceiling" selected>Statutory Ceiling (₹25,000/month)</option>
+              <option value="full_basic">Full Basic Salary</option>
+              <option value="custom">Custom Amount</option>
+            </select>
+          </div>
+
+          <!-- Tax Regime -->
+          <div class="input-group">
+            <label class="input-label">
+              Tax Regime
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">New regime is the default for 2026–27. Wider slabs, ₹75K standard deduction, but no 80C/80D/HRA deductions. Old regime allows deductions but has narrower slabs.</span>
+              </span>
+            </label>
+            <div class="tabs" id="regime-tabs">
+              <button class="tab active" data-regime="new" id="tab-new-regime">New Regime</button>
+              <button class="tab" data-regime="old" id="tab-old-regime">Old Regime</button>
+            </div>
+          </div>
+
+          <!-- Professional Tax State -->
+          <div class="input-group">
+            <label for="pt-state" class="input-label">Professional Tax State</label>
+            <select id="pt-state" class="input select">
+              {ptStates.map(([key, config]) => (
+                <option value={key} selected={key === 'maharashtra'}>
+                  {config.state} {config.annualMax > 0 ? `(₹${config.annualMax}/yr)` : '(None)'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <!-- Variable Pay (collapsible) -->
+          <details class="advanced-section">
+            <summary>Variable Pay & Bonus</summary>
+            <div class="details-content">
+              <div class="input-group">
+                <label for="variable-pay" class="input-label">Target Variable Pay (Annual)</label>
+                <div class="input-with-prefix">
+                  <span class="input-prefix">₹</span>
+                  <input type="text" id="variable-pay" class="input input-number" placeholder="0" inputmode="decimal" />
+                </div>
+              </div>
+              <div class="input-group">
+                <label for="variable-payout" class="input-label">Expected Payout %</label>
+                <input type="number" id="variable-payout" class="input input-number" value="100" min="0" max="200" />
+              </div>
+              <div class="input-group">
+                <label for="joining-bonus" class="input-label">Joining Bonus (One-time)</label>
+                <div class="input-with-prefix">
+                  <span class="input-prefix">₹</span>
+                  <input type="text" id="joining-bonus" class="input input-number" placeholder="0" inputmode="decimal" />
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Employer NPS -->
+          <details class="advanced-section">
+            <summary>Employer NPS</summary>
+            <div class="details-content">
+              <div class="input-group">
+                <label for="employer-nps" class="input-label">
+                  Employer NPS Contribution (Annual)
+                  <span class="tooltip-trigger">
+                    <span class="tooltip-icon">?</span>
+                    <span class="tooltip-content">If your employer contributes to NPS as part of CTC, enter the annual amount. Up to 14% of basic is deductible under the new regime (Section 124).</span>
+                  </span>
+                </label>
+                <div class="input-with-prefix">
+                  <span class="input-prefix">₹</span>
+                  <input type="text" id="employer-nps" class="input input-number" placeholder="0" inputmode="decimal" />
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Old Regime Deductions (shown only when old regime selected) -->
+          <div id="old-regime-deductions" style="display: none;">
+            <details class="advanced-section" open>
+              <summary>Old Regime Deductions</summary>
+              <div class="details-content">
+                <div class="input-group">
+                  <label for="rent-paid" class="input-label">Annual Rent Paid (for HRA)</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">₹</span>
+                    <input type="text" id="rent-paid" class="input input-number" placeholder="0" inputmode="decimal" />
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label class="input-label">City Type (for HRA)</label>
+                  <div class="radio-group">
+                    <label class="radio-pill">
+                      <input type="radio" name="metro" value="true" /> Metro
+                    </label>
+                    <label class="radio-pill">
+                      <input type="radio" name="metro" value="false" checked /> Non-Metro
+                    </label>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label for="deduction-80c" class="input-label">Section 80C (excl. PF) — max ₹1.5L</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">₹</span>
+                    <input type="text" id="deduction-80c" class="input input-number" placeholder="0" inputmode="decimal" />
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label for="deduction-80d" class="input-label">Section 80D — Health Insurance (Self)</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">₹</span>
+                    <input type="text" id="deduction-80d" class="input input-number" placeholder="0" inputmode="decimal" />
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label for="deduction-80d-parents" class="input-label">Section 80D — Parents</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">₹</span>
+                    <input type="text" id="deduction-80d-parents" class="input input-number" placeholder="0" inputmode="decimal" />
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label for="home-loan" class="input-label">Home Loan Interest — max ₹2L</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">₹</span>
+                    <input type="text" id="home-loan" class="input input-number" placeholder="0" inputmode="decimal" />
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- Calculate Button -->
+          <button class="btn btn-primary mt-lg" style="width: 100%;" id="calculate-btn">
+            Calculate In-Hand Salary
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══ Right: Results Panel ═══ -->
+      <div class="calc-results" id="results-panel">
+
+        <!-- Result Card -->
+        <div class="result-card mb-lg" id="result-card">
+          <div class="result-label">Estimated Monthly In-Hand</div>
+          <div class="result-amount" id="result-monthly">—</div>
+          <div class="result-subtext">
+            <span id="result-annual-inhand">—</span> per year
+          </div>
+          <button type="button" class="btn-payslip" id="print-payslip-btn">
+            📄 Download / Print Simulated Payslip (PDF)
+          </button>
+        </div>
+
+        <!-- Monthly Breakdown Donut Summary -->
+        <div class="card mb-lg">
+          <h3 class="title-sm mb-base">Monthly Breakdown</h3>
+          <div class="monthly-summary-grid" id="monthly-summary">
+            <div class="summary-item">
+              <span class="summary-dot" style="background: var(--color-semantic-up);"></span>
+              <span class="body-sm">In-Hand</span>
+              <span class="number-display text-right" id="summary-inhand">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-dot" style="background: var(--color-primary);"></span>
+              <span class="body-sm">Income Tax (TDS)</span>
+              <span class="number-display text-right" id="summary-tax">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-dot" style="background: var(--color-accent-yellow);"></span>
+              <span class="body-sm">Employee PF</span>
+              <span class="number-display text-right" id="summary-pf">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-dot" style="background: var(--color-muted);"></span>
+              <span class="body-sm">Professional Tax</span>
+              <span class="number-display text-right" id="summary-pt">—</span>
+            </div>
+          </div>
+          <!-- Visual bar -->
+          <div class="salary-bar mt-base" id="salary-bar">
+            <div class="salary-bar-segment" id="bar-inhand" style="background: var(--color-semantic-up);"></div>
+            <div class="salary-bar-segment" id="bar-tax" style="background: var(--color-primary);"></div>
+            <div class="salary-bar-segment" id="bar-pf" style="background: var(--color-accent-yellow);"></div>
+            <div class="salary-bar-segment" id="bar-pt" style="background: var(--color-muted);"></div>
+          </div>
+        </div>
+
+        <!-- CTC Decomposition -->
+        <div class="card mb-lg">
+          <h3 class="title-sm mb-base">CTC Decomposition (Annual)</h3>
+          <table class="breakdown-table" id="ctc-breakdown">
+            <tbody id="ctc-breakdown-body">
+              <tr><td colspan="2" class="text-muted body-sm">Enter your CTC to see breakdown</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tax Breakdown -->
+        <div class="card mb-lg">
+          <h3 class="title-sm mb-base">Tax Calculation</h3>
+          <table class="breakdown-table" id="tax-breakdown">
+            <tbody id="tax-breakdown-body">
+              <tr><td colspan="2" class="text-muted body-sm">Enter your CTC to see tax breakdown</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Slab-wise Tax -->
+        <details class="card mb-lg" id="slab-details">
+          <summary class="title-sm">Slab-wise Tax Breakdown</summary>
+          <div class="details-content">
+            <table class="breakdown-table">
+              <thead>
+                <tr>
+                  <th>Income Slab</th>
+                  <th class="text-right">Rate</th>
+                  <th class="text-right">Tax</th>
+                </tr>
+              </thead>
+              <tbody id="slab-breakdown-body">
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <!-- Assumptions & Disclaimer -->
+        <div class="card mb-lg">
+          <h3 class="title-sm mb-sm">Assumptions Used</h3>
+          <ul class="assumptions-list" id="assumptions-list">
+            <li>Enter your CTC to see assumptions</li>
+          </ul>
+        </div>
+
+        <div class="disclaimer">
+          <strong>Estimate only.</strong> This is an indicative calculation based on the displayed assumptions and
+          <a href="/sources">linked official sources</a>. Your actual payslip may differ based on your employer's
+          salary structure, payroll policy, state-specific rules, and individual tax situation. Not personal tax advice.
+          Rules last reviewed: {RULES_METADATA.rulesLastReviewed}.
+        </div>
+
+        <!-- Simulated Payslip Modal & Print Layout -->
+        <div id="simulated-payslip-modal" class="payslip-modal" style="display:none;">
+          <div class="payslip-modal-content">
+            <div class="payslip-modal-header">
+              <span class="title-sm">Simulated Payslip Preview</span>
+              <button type="button" id="close-payslip-btn" class="btn btn-outline btn-sm">✕ Close</button>
+            </div>
+
+            <div id="printable-payslip" class="printable-payslip">
+              <div class="payslip-watermark">ILLUSTRATIVE ESTIMATE — NOT AN EMPLOYER-ISSUED PAYSLIP</div>
+              <div class="payslip-header">
+                <div class="payslip-brand">
+                  <span class="payslip-logo">₹</span>
+                  <div>
+                    <h3 class="payslip-title">PAYDECODE SIMULATED PAYSLIP</h3>
+                    <p class="caption text-muted">Independent Salary Decomposition Engine • paydecode.pages.dev</p>
+                  </div>
+                </div>
+                <div class="payslip-meta text-right">
+                  <p class="caption font-bold">Tax Year: 2026–27</p>
+                  <p class="caption text-muted" id="ps-date">Date Generated: 18 Oct 2026</p>
+                  <p class="caption text-muted">Baseline: Income-tax Act, 2025</p>
+                </div>
+              </div>
+
+              <div class="payslip-employee-grid">
+                <div><span class="caption text-muted">Document Type:</span> <strong class="caption">Simulated Compensation Estimate</strong></div>
+                <div><span class="caption text-muted">Annual CTC:</span> <strong class="caption font-mono" id="ps-ctc">₹12,00,000</strong></div>
+                <div><span class="caption text-muted">Tax Regime:</span> <strong class="caption" id="ps-regime">New Regime (Sec 202)</strong></div>
+                <div><span class="caption text-muted">EPFO Ceiling:</span> <strong class="caption font-mono">₹25,000/mo (Sep 2026)</strong></div>
+              </div>
+
+              <div class="payslip-tables-grid">
+                <div class="payslip-col">
+                  <h4 class="payslip-col-heading">MONTHLY EARNINGS</h4>
+                  <table class="payslip-table">
+                    <tbody id="ps-earnings-tbody"></tbody>
+                  </table>
+                </div>
+                <div class="payslip-col">
+                  <h4 class="payslip-col-heading">MONTHLY DEDUCTIONS</h4>
+                  <table class="payslip-table">
+                    <tbody id="ps-deductions-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="payslip-net-box">
+                <div>
+                  <span class="caption text-muted uppercase">Estimated Monthly Bank Credit:</span>
+                  <div class="payslip-net-amount text-success" id="ps-net-amount">₹88,750</div>
+                  <div class="caption text-muted" id="ps-net-words">approx Eighty-Eight Thousand Seven Hundred Fifty Rupees</div>
+                </div>
+              </div>
+
+              <div class="payslip-disclaimer">
+                <strong>Illustrative estimate — not an employer-issued payslip.</strong> Generated by PayDecode using client-side algorithms based on user-provided inputs and published statutory rules as of 17 October 2026. This document does not constitute an official payroll certificate or legal proof of employment.
+              </div>
+            </div>
+
+            <div class="payslip-actions mt-md text-center">
+              <button type="button" id="trigger-print-btn" class="btn btn-primary">
+                🖨️ Print / Save to PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Visual Key Takeaway Cards (Anti-Text-Heavy Design) ═══ -->
+  <section class="band-soft mt-xxl">
+    <div class="container" style="max-width: 1000px;">
+      <div class="text-center mb-xl">
+        <div class="badge badge-accent mb-xs">Key Insights</div>
+        <h2 class="display-sm mb-xs">How CTC Translates to Real In-Hand Pay</h2>
+        <p class="body-md text-muted">Why CTC ÷ 12 does not equal your monthly bank credit</p>
+      </div>
+
+      <div class="takeaway-grid">
+        <div class="takeaway-card">
+          <div class="takeaway-icon">💸</div>
+          <h3 class="takeaway-title">The Gross vs Net Gap</h3>
+          <p class="takeaway-desc">
+            Your monthly in-hand is 18% to 35% lower than CTC ÷ 12 because employer PF, gratuity provisions, employee PF, and tax TDS are subtracted before bank transfer.
+          </p>
+        </div>
+
+        <div class="takeaway-card">
+          <div class="takeaway-icon">🏛️</div>
+          <h3 class="takeaway-title">EPFO ₹25,000 Cap (Sep 2026)</h3>
+          <p class="takeaway-desc">
+            The updated wage ceiling caps standard EPF at ₹3,000/month. If your employer deducts PF on full basic, deductions can be up to ₹9,600/month, cutting your immediate take-home.
+          </p>
+        </div>
+
+        <div class="takeaway-card">
+          <div class="takeaway-icon">⚖️</div>
+          <h3 class="takeaway-title">Income-tax Act, 2025 Slabs</h3>
+          <p class="takeaway-desc">
+            Under Section 202, tax rates start at 0% up to ₹4L, with standard deduction of ₹75,000 and Section 156 full rebate for taxable incomes up to ₹12 Lakhs.
+          </p>
+        </div>
+      </div>
+
+      <!-- Collapsible Detailed Educational Guide (Preserves 100% SEO Keywords) -->
+      <details class="card mt-lg" style="padding: var(--space-lg); border: 1px dashed var(--color-hairline);">
+        <summary class="title-sm" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+          <span>📘 In-Depth Salary Breakdown Guide: Deductions, Slabs & Policies</span>
+          <span class="badge badge-accent">Read Full Analysis</span>
+        </summary>
+        <div class="mt-md pt-md border-top">
+          <p class="body-md text-body mb-md">
+            Your Cost to Company (CTC) is the total annual expenditure your employer incurs for employing you. However, your monthly in-hand salary — the amount that actually lands in your bank account — is significantly lower than CTC ÷ 12.
+          </p>
+
+          <h3 class="title-md mb-xs">What's deducted from your CTC?</h3>
+          <ul class="seo-list mb-md">
+            <li><strong>Employer PF contribution</strong> — Your employer's 12% contribution to EPF is a CTC cost, not part of your cash salary. With the new ₹25,000 statutory ceiling (effective 17 September 2026), this is ₹3,000/month for the ceiling scenario.</li>
+            <li><strong>Gratuity provision</strong> — Typically ~4.81% of basic salary, set aside as a CTC component but not paid monthly.</li>
+            <li><strong>Employee PF</strong> — Your 12% contribution is deducted from your cash salary before it reaches your bank.</li>
+            <li><strong>Income tax (TDS)</strong> — Monthly tax deducted at source based on your annual tax liability.</li>
+            <li><strong>Professional tax</strong> — A state-level tax, typically ₹200/month (₹2,500/year) in most states.</li>
+          </ul>
+
+          <h3 class="title-md mb-xs">New vs Old Tax Regime for 2026–27</h3>
+          <p class="body-md text-body mb-md">
+            The new tax regime under Section 202 of the Income-tax Act, 2025 is the default for Tax Year 2026–27. It offers wider slabs (0% up to ₹4L, then 5% increments) and a ₹75,000 standard deduction. The old regime allows deductions like 80C, 80D, HRA exemption, and home loan interest, but has narrower slabs.
+          </p>
+
+          <h3 class="title-md mb-xs">Why two offers with the same CTC can have different in-hand pay</h3>
+          <p class="body-md text-body">
+            Different employers structure CTC differently. Company A might set basic at 40% of CTC with statutory PF, while Company B sets basic at 50% with PF on full basic. The result: identical headline CTC, but different monthly bank credits.
+          </p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ═══ Benchmarks Section ═══ -->
+  <section class="band-soft pt-xl pb-xxl border-top">
+    <div class="container">
+      <div class="text-center mb-xl">
+        <h2 class="display-sm mb-xs">Explore Real Offer Structures & Government Pay Scales</h2>
+        <p class="body-md text-muted" style="max-width:650px; margin:0 auto;">
+          Compare how your computed in-hand numbers measure against standard corporate tracks and 7th/8th CPC pay levels.
+        </p>
+      </div>
+
+      <div class="benchmarks-grid">
+        <div class="card p-lg">
+          <h3 class="title-sm mb-xs">Corporate Salary Tracks</h3>
+          <p class="caption text-muted mb-md">Verified offer letters from campus drives</p>
+          <div class="benchmarks-list">
+            <a href="/company/tcs-ninja" class="benchmark-item"><span>TCS Ninja</span><span class="font-mono">₹3.36 LPA</span></a>
+            <a href="/company/tcs-digital" class="benchmark-item"><span>TCS Digital</span><span class="font-mono">₹7.0 LPA</span></a>
+            <a href="/company/tcs-prime" class="benchmark-item"><span>TCS Prime</span><span class="font-mono">₹9.0 LPA</span></a>
+            <a href="/company/infosys-se" class="benchmark-item"><span>Infosys SE</span><span class="font-mono">₹3.6 LPA</span></a>
+            <a href="/company/infosys-sp" class="benchmark-item"><span>Infosys SP</span><span class="font-mono">₹9.5 LPA</span></a>
+            <a href="/company/wipro-turbo" class="benchmark-item"><span>Wipro Turbo</span><span class="font-mono">₹6.5 LPA</span></a>
+            <a href="/company/accenture-ase" class="benchmark-item"><span>Accenture ASE</span><span class="font-mono">₹4.5 LPA</span></a>
+            <a href="/company/cognizant-genc" class="benchmark-item"><span>Cognizant GenC</span><span class="font-mono">₹4.0 LPA</span></a>
+          </div>
+        </div>
+
+        <div class="card p-lg">
+          <h3 class="title-sm mb-xs">Government Pay Scales & Scenarios</h3>
+          <p class="caption text-muted mb-md">7th CPC Official Scales & 8th CPC Fitment Simulations</p>
+          <div class="benchmarks-list">
+            <a href="/govt-salary/7th-cpc-pay-level-1" class="benchmark-item"><span>7th CPC Level 1 (MTS)</span><span class="badge badge-success">₹18K Basic</span></a>
+            <a href="/govt-salary/7th-cpc-pay-level-7" class="benchmark-item"><span>7th CPC Level 7 (ASO/Inspector)</span><span class="badge badge-success">₹44.9K Basic</span></a>
+            <a href="/govt-salary/7th-cpc-pay-level-10" class="benchmark-item"><span>7th CPC Level 10 (Group A)</span><span class="badge badge-success">₹56.1K Basic</span></a>
+            <a href="/govt-salary/8th-cpc-fitment-scenario-level-1" class="benchmark-item"><span>8th CPC Level 1 Simulator</span><span class="badge badge-accent">1.92x–2.86x</span></a>
+            <a href="/govt-salary/8th-cpc-fitment-scenario-level-7" class="benchmark-item"><span>8th CPC Level 7 Simulator</span><span class="badge badge-accent">1.92x–2.86x</span></a>
+            <a href="/govt-salary/8th-cpc-fitment-scenario-level-10" class="benchmark-item"><span>8th CPC Level 10 Simulator</span><span class="badge badge-accent">1.92x–2.86x</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  /* Calculator layout */
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    padding: 0 0 var(--space-section);
+    align-items: start;
+  }
+
+  @media (max-width: 1024px) {
+    .calc-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .calc-inputs .card {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-lg));
+  }
+
+  @media (max-width: 1024px) {
+    .calc-inputs .card {
+      position: static;
+    }
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--color-muted);
+  }
+
+  .breadcrumb a {
+    color: var(--color-muted);
+  }
+
+  .breadcrumb a:hover {
+    color: var(--color-primary);
+  }
+
+  .breadcrumb-sep {
+    margin: 0 var(--space-xs);
+    color: var(--color-muted-soft);
+  }
+
+  /* Radio Pills */
+  .radio-group {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .radio-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--rounded-pill);
+    border: 1px solid var(--color-hairline);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-body);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: var(--color-canvas);
+  }
+
+  .radio-pill:has(input:checked) {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .radio-pill input[type="radio"] {
+    display: none;
+  }
+
+  .radio-pill-custom .input-inline {
+    width: 50px;
+    padding: 2px 6px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-xs);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+  }
+
+  .radio-pill-custom .input-inline:focus {
+    border-color: var(--color-primary);
+  }
+
+  /* Advanced sections */
+  .advanced-section {
+    margin-top: var(--space-base);
+    border: 1px solid var(--color-hairline-soft);
+    border-radius: var(--rounded-md);
+  }
+
+  .advanced-section summary {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* Monthly summary */
+  .monthly-summary-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .summary-item {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    gap: var(--space-sm);
+    align-items: center;
+  }
+
+  .summary-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--rounded-full);
+  }
+
+  /* Salary bar visualization */
+  .salary-bar {
+    display: flex;
+    height: 12px;
+    border-radius: var(--rounded-pill);
+    overflow: hidden;
+    background: var(--color-surface-strong);
+  }
+
+  .salary-bar-segment {
+    height: 100%;
+    transition: width var(--transition-slow);
+  }
+
+  /* Assumptions list */
+  .assumptions-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .assumptions-list li {
+    font-size: 13px;
+    color: var(--color-muted);
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .assumptions-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-muted-soft);
+  }
+
+  /* SEO content */
+  .seo-content p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-body);
+    margin-bottom: var(--space-base);
+  }
+
+  .seo-content ul {
+    padding-left: var(--space-lg);
+    margin-bottom: var(--space-base);
+  }
+
+  .seo-content li {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-body);
+    margin-bottom: var(--space-xs);
+  }
+
+  /* ─── Simulated Payslip Styles ─── */
+  .payslip-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 11, 13, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+  }
+
+  .payslip-modal-content {
+    background: var(--color-canvas);
+    border-radius: var(--rounded-lg);
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .payslip-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .printable-payslip {
+    background: #ffffff;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-lg);
+    color: #0a0b0d;
+  }
+
+  .payslip-watermark {
+    background: rgba(0, 82, 255, 0.08);
+    color: var(--color-primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 6px;
+    border-radius: var(--rounded-xs);
+    margin-bottom: var(--space-md);
+  }
+
+  .payslip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: var(--space-md);
+    border-bottom: 2px solid var(--color-hairline);
+    margin-bottom: var(--space-md);
+  }
+
+  .payslip-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .payslip-logo {
+    width: 36px;
+    height: 36px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--rounded-sm);
+  }
+
+  .payslip-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .payslip-employee-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    background: var(--color-surface-soft);
+    padding: var(--space-sm);
+    border-radius: var(--rounded-sm);
+    margin-bottom: var(--space-md);
+    font-size: 12px;
+  }
+
+  .payslip-tables-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .payslip-col-heading {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-muted);
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+
+  .payslip-table {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+  }
+
+  .payslip-table td {
+    padding: 4px 0;
+  }
+
+  .payslip-net-box {
+    background: rgba(5, 177, 105, 0.06);
+    border: 1px solid rgba(5, 177, 105, 0.2);
+    border-radius: var(--rounded-sm);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .payslip-net-amount {
+    font-size: 24px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+
+  .payslip-disclaimer {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--color-muted);
+    border-top: 1px solid var(--color-hairline);
+    padding-top: var(--space-sm);
+  }
+
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+    #printable-payslip, #printable-payslip * {
+      visibility: visible !important;
+    }
+    #printable-payslip {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      box-shadow: none !important;
+      border: 1px solid #dee1e6 !important;
+    }
+    .payslip-modal {
+      position: static !important;
+      background: none !important;
+      padding: 0 !important;
+    }
+    .payslip-modal-header, .payslip-actions, .nav, .footer {
+      display: none !important;
+    }
+  }
+
+  .benchmarks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (max-width: 900px) {
+    .benchmarks-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .benchmarks-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .benchmark-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    text-decoration: none;
+    color: var(--color-body-strong);
+    transition: all var(--transition-fast);
+  }
+
+  .benchmark-item:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    transform: translateX(3px);
+  }
+</style>
+
+<script>
+  /**
+   * CTC Calculator — main interactive logic.
+   */
+  import { calculateSalary, type SalaryInput } from '../utils/salaryEngine';
+  import { parseSalaryInput, formatINR, numberToIndianWords } from '../utils/formatCurrency';
+  import type { PfPolicy } from '../config/statutoryRules';
+
+  // ─── DOM Elements ───
+  const ctcInput = document.getElementById('ctc-input') as HTMLInputElement;
+  const pfSelect = document.getElementById('pf-policy') as HTMLSelectElement;
+  const ptSelect = document.getElementById('pt-state') as HTMLSelectElement;
+  const calcBtn = document.getElementById('calculate-btn') as HTMLButtonElement;
+  const basicCustom = document.getElementById('basic-custom') as HTMLInputElement;
+
+  // Variable pay
+  const variableInput = document.getElementById('variable-pay') as HTMLInputElement;
+  const payoutInput = document.getElementById('variable-payout') as HTMLInputElement;
+  const joiningInput = document.getElementById('joining-bonus') as HTMLInputElement;
+
+  // Employer NPS
+  const npsInput = document.getElementById('employer-nps') as HTMLInputElement;
+
+  // Old regime
+  const rentInput = document.getElementById('rent-paid') as HTMLInputElement;
+  const deduction80c = document.getElementById('deduction-80c') as HTMLInputElement;
+  const deduction80d = document.getElementById('deduction-80d') as HTMLInputElement;
+  const deduction80dParents = document.getElementById('deduction-80d-parents') as HTMLInputElement;
+  const homeLoan = document.getElementById('home-loan') as HTMLInputElement;
+
+  // Result elements
+  const resultMonthly = document.getElementById('result-monthly')!;
+  const resultAnnual = document.getElementById('result-annual-inhand')!;
+  const summaryInhand = document.getElementById('summary-inhand')!;
+  const summaryTax = document.getElementById('summary-tax')!;
+  const summaryPf = document.getElementById('summary-pf')!;
+  const summaryPt = document.getElementById('summary-pt')!;
+  const barInhand = document.getElementById('bar-inhand')!;
+  const barTax = document.getElementById('bar-tax')!;
+  const barPf = document.getElementById('bar-pf')!;
+  const barPt = document.getElementById('bar-pt')!;
+  const ctcBody = document.getElementById('ctc-breakdown-body')!;
+  const taxBody = document.getElementById('tax-breakdown-body')!;
+  const slabBody = document.getElementById('slab-breakdown-body')!;
+  const assumptionsList = document.getElementById('assumptions-list')!;
+  const oldRegimePanel = document.getElementById('old-regime-deductions')!;
+
+  // ─── State ───
+  let currentRegime: 'new' | 'old' = 'new';
+
+  // Regime tabs
+  document.querySelectorAll('#regime-tabs .tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#regime-tabs .tab').forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentRegime = (tab as HTMLElement).dataset.regime as 'new' | 'old';
+      oldRegimePanel.style.display = currentRegime === 'old' ? 'block' : 'none';
+      runCalculation();
+    });
+  });
+
+  // ─── Get Basic Percent ───
+  function getBasicPercent(): number {
+    const checked = document.querySelector('input[name="basic-percent"]:checked') as HTMLInputElement;
+    if (!checked) return 40;
+    if (checked.value === 'custom') {
+      return parseFloat(basicCustom?.value || '40') || 40;
+    }
+    return parseFloat(checked.value);
+  }
+
+  // ─── Get Metro ───
+  function getIsMetro(): boolean {
+    const checked = document.querySelector('input[name="metro"]:checked') as HTMLInputElement;
+    return checked?.value === 'true';
+  }
+
+  // ─── Run Calculation ───
+  function runCalculation() {
+    const ctcValue = parseSalaryInput(ctcInput.value);
+    if (!ctcValue || ctcValue <= 0) return;
+
+    const input: SalaryInput = {
+      annualCTC: ctcValue,
+      basicPercent: getBasicPercent(),
+      pfPolicy: pfSelect.value as PfPolicy,
+      regime: currentRegime,
+      professionalTaxState: ptSelect.value,
+      targetVariablePay: parseSalaryInput(variableInput?.value || '') || 0,
+      variablePayoutPercent: parseFloat(payoutInput?.value || '100') || 100,
+      joiningBonus: parseSalaryInput(joiningInput?.value || '') || 0,
+      employerNPS: parseSalaryInput(npsInput?.value || '') || 0,
+      isMetro: getIsMetro(),
+      rentPaid: parseSalaryInput(rentInput?.value || '') || 0,
+      deduction80C: parseSalaryInput(deduction80c?.value || '') || 0,
+      deduction80D_self: parseSalaryInput(deduction80d?.value || '') || 0,
+      deduction80D_parents: parseSalaryInput(deduction80dParents?.value || '') || 0,
+      homeLoanInterest: parseSalaryInput(homeLoan?.value || '') || 0,
+    };
+
+    const result = calculateSalary(input);
+
+    // ─── Update Result Card ───
+    resultMonthly.textContent = formatINR(result.monthlyInHand);
+    resultAnnual.textContent = formatINR(result.annualInHand);
+
+    // ─── Update Monthly Summary ───
+    summaryInhand.textContent = formatINR(result.monthlyInHand);
+    summaryTax.textContent = formatINR(result.tax.monthlyTDS);
+    summaryPf.textContent = formatINR(result.monthlyEmployeePF);
+    summaryPt.textContent = formatINR(result.monthlyProfessionalTax);
+
+    // ─── Update Salary Bar ───
+    const monthlyGross = result.monthlyFixedCash;
+    if (monthlyGross > 0) {
+      barInhand.style.width = `${(result.monthlyInHand / monthlyGross) * 100}%`;
+      barTax.style.width = `${(result.tax.monthlyTDS / monthlyGross) * 100}%`;
+      barPf.style.width = `${(result.monthlyEmployeePF / monthlyGross) * 100}%`;
+      barPt.style.width = `${(result.monthlyProfessionalTax / monthlyGross) * 100}%`;
+    }
+
+    // ─── CTC Decomposition Table ───
+    const ctcRows = [
+      { label: 'Annual CTC', value: result.annualCTC, cls: 'subtotal' },
+      { label: 'Basic Salary', value: result.annualBasic },
+      { label: 'HRA', value: result.annualHRA },
+      { label: 'Special Allowance', value: result.annualSpecialAllowance },
+      ...(result.targetVariablePay > 0 ? [{ label: 'Target Variable Pay', value: result.targetVariablePay }] : []),
+      ...(result.joiningBonus > 0 ? [{ label: 'Joining Bonus', value: result.joiningBonus }] : []),
+      { label: 'Employer PF', value: result.employerPF.annualEmployerPF, cls: 'indent' },
+      { label: 'Gratuity Accrual', value: result.gratuity.annualAccrual, cls: 'indent' },
+      ...(result.employerNPS > 0 ? [{ label: 'Employer NPS', value: result.employerNPS, cls: 'indent' }] : []),
+      { label: 'Fixed Cash Salary', value: result.annualFixedCash, cls: 'subtotal' },
+      { label: 'Employee PF', value: -result.employeePF, cls: 'deduction' },
+      { label: 'Professional Tax', value: -result.professionalTax, cls: 'deduction' },
+      { label: 'Income Tax', value: -result.tax.totalTax, cls: 'deduction' },
+      { label: 'Annual In-Hand', value: result.annualInHand, cls: 'total' },
+    ];
+
+    ctcBody.innerHTML = ctcRows
+      .map(
+        (r) =>
+          `<tr class="${(r as any).cls || ''}">
+            <td class="${(r as any).cls === 'indent' ? 'indent' : ''}">${r.label}</td>
+            <td>${r.value < 0 ? `<span class="text-down">${formatINR(Math.abs(r.value))}</span>` : formatINR(r.value)}</td>
+          </tr>`
+      )
+      .join('');
+
+    // ─── Tax Breakdown Table ───
+    const taxRows = [
+      { label: 'Gross Salary', value: result.tax.grossSalary },
+      { label: 'Standard Deduction', value: -result.tax.standardDeduction, cls: 'deduction' },
+      ...(result.tax.professionalTaxDeduction > 0 ? [{ label: 'Professional Tax', value: -result.tax.professionalTaxDeduction, cls: 'deduction' }] : []),
+      ...(result.tax.employerNPSDeduction > 0 ? [{ label: 'Employer NPS (Sec 124)', value: -result.tax.employerNPSDeduction, cls: 'deduction' }] : []),
+      ...(result.tax.hraExemption > 0 ? [{ label: 'HRA Exemption', value: -result.tax.hraExemption, cls: 'deduction' }] : []),
+      ...(result.tax.chapterVIADeductions > 0 ? [{ label: 'Chapter VI-A Deductions', value: -result.tax.chapterVIADeductions, cls: 'deduction' }] : []),
+      ...(result.tax.homeLoanDeduction > 0 ? [{ label: 'Home Loan Interest (Sec 24)', value: -result.tax.homeLoanDeduction, cls: 'deduction' }] : []),
+      { label: 'Taxable Income', value: result.tax.taxableIncome, cls: 'subtotal' },
+      { label: 'Tax on Slabs', value: result.tax.slabTax },
+      ...(result.tax.rebate > 0 ? [{ label: 'Rebate (Sec 156)', value: -result.tax.rebate, cls: 'deduction' }] : []),
+      { label: 'Tax after Rebate', value: result.tax.taxAfterRebate },
+      ...(result.tax.surcharge > 0 ? [{ label: 'Surcharge', value: result.tax.surcharge }] : []),
+      { label: `Cess (4%)`, value: result.tax.cess },
+      { label: 'Total Annual Tax', value: result.tax.totalTax, cls: 'total' },
+      { label: 'Monthly TDS (estimate)', value: result.tax.monthlyTDS, cls: 'subtotal' },
+    ];
+
+    taxBody.innerHTML = taxRows
+      .map(
+        (r) =>
+          `<tr class="${(r as any).cls || ''}">
+            <td>${r.label}</td>
+            <td>${r.value < 0 ? `<span class="text-down">${formatINR(Math.abs(r.value))}</span>` : formatINR(r.value)}</td>
+          </tr>`
+      )
+      .join('');
+
+    // ─── Slab Breakdown ───
+    slabBody.innerHTML = result.tax.slabBreakdown
+      .map(
+        (s) =>
+          `<tr>
+            <td>${s.slab}</td>
+            <td class="text-right">${(s.rate * 100).toFixed(0)}%</td>
+            <td class="text-right font-mono">${formatINR(s.tax)}</td>
+          </tr>`
+      )
+      .join('');
+
+    // ─── Assumptions ───
+    assumptionsList.innerHTML = result.assumptions
+      .map((a) => `<li>${a}</li>`)
+      .join('');
+
+    // ─── Update Simulated Payslip ───
+    const psCtc = document.getElementById('ps-ctc');
+    const psRegime = document.getElementById('ps-regime');
+    const psNetAmount = document.getElementById('ps-net-amount');
+    const psNetWords = document.getElementById('ps-net-words');
+    const psEarningsTbody = document.getElementById('ps-earnings-tbody');
+    const psDeductionsTbody = document.getElementById('ps-deductions-tbody');
+
+    if (psCtc) psCtc.textContent = formatINR(result.annualCTC);
+    if (psRegime) psRegime.textContent = result.tax.regime === 'new' ? 'New Regime (Sec 202)' : 'Old Regime';
+    if (psNetAmount) psNetAmount.textContent = formatINR(result.monthlyInHand);
+    if (psNetWords) psNetWords.textContent = `approx ${numberToIndianWords(result.monthlyInHand)} Rupees`;
+
+    if (psEarningsTbody) {
+      psEarningsTbody.innerHTML = `
+        <tr><td>Basic Salary</td><td class="text-right font-mono">${formatINR(result.monthlyBasic)}</td></tr>
+        <tr><td>House Rent Allowance (HRA)</td><td class="text-right font-mono">${formatINR(Math.round(result.annualHRA / 12))}</td></tr>
+        <tr><td>Special Allowance</td><td class="text-right font-mono">${formatINR(Math.round(result.annualSpecialAllowance / 12))}</td></tr>
+        <tr style="font-weight:700; border-top:1px solid #dee1e6;"><td>Monthly Gross Earnings</td><td class="text-right font-mono">${formatINR(result.monthlyFixedCash)}</td></tr>
+      `;
+    }
+
+    if (psDeductionsTbody) {
+      psDeductionsTbody.innerHTML = `
+        <tr><td>Employee Provident Fund (EPF)</td><td class="text-right font-mono">${formatINR(result.monthlyEmployeePF)}</td></tr>
+        <tr><td>Professional Tax (PT)</td><td class="text-right font-mono">${formatINR(result.monthlyProfessionalTax)}</td></tr>
+        <tr><td>Income Tax (Monthly TDS)</td><td class="text-right font-mono">${formatINR(result.tax.monthlyTDS)}</td></tr>
+        <tr style="font-weight:700; border-top:1px solid #dee1e6;"><td>Total Monthly Deductions</td><td class="text-right font-mono">${formatINR(result.monthlyEmployeePF + result.monthlyProfessionalTax + result.tax.monthlyTDS)}</td></tr>
+      `;
+    }
+
+    // Scroll to results on mobile
+    if (window.innerWidth < 1024) {
+      document.getElementById('result-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // ─── Payslip Modal Handlers ───
+  const printPayslipBtn = document.getElementById('print-payslip-btn');
+  const closePayslipBtn = document.getElementById('close-payslip-btn');
+  const triggerPrintBtn = document.getElementById('trigger-print-btn');
+  const payslipModal = document.getElementById('simulated-payslip-modal');
+
+  printPayslipBtn?.addEventListener('click', () => {
+    if (payslipModal) payslipModal.style.display = 'flex';
+  });
+
+  closePayslipBtn?.addEventListener('click', () => {
+    if (payslipModal) payslipModal.style.display = 'none';
+  });
+
+  triggerPrintBtn?.addEventListener('click', () => {
+    window.print();
+  });
+
+  // Close modal when clicking outside content
+  payslipModal?.addEventListener('click', (e) => {
+    if (e.target === payslipModal) {
+      payslipModal.style.display = 'none';
+    }
+  });
+
+  // ─── Event Listeners ───
+  calcBtn.addEventListener('click', runCalculation);
+  ctcInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runCalculation(); });
+
+  // Slider & Preset Chips Listeners
+  const ctcSlider = document.getElementById('ctc-slider') as HTMLInputElement;
+  const presetChips = document.querySelectorAll('#ctc-preset-chips .preset-chip');
+
+  ctcSlider?.addEventListener('input', () => {
+    ctcInput.value = ctcSlider.value;
+    presetChips.forEach((c) => c.classList.remove('active'));
+    runCalculation();
+  });
+
+  presetChips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const val = chip.getAttribute('data-val');
+      if (val) {
+        ctcInput.value = val;
+        if (ctcSlider) ctcSlider.value = val;
+        presetChips.forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+        runCalculation();
+      }
+    });
+  });
+
+  ctcInput.addEventListener('input', () => {
+    const parsed = parseSalaryInput(ctcInput.value);
+    if (parsed && ctcSlider) {
+      ctcSlider.value = String(parsed);
+    }
+  });
+
+  // Auto-calculate on any input change
+  [pfSelect, ptSelect].forEach((el) => el?.addEventListener('change', runCalculation));
+  document.querySelectorAll('input[name="basic-percent"]').forEach((el) => el.addEventListener('change', runCalculation));
+  document.querySelectorAll('input[name="metro"]').forEach((el) => el.addEventListener('change', runCalculation));
+
+  // Run initial calculation
+  runCalculation();
+</script>

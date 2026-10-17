@@ -1,0 +1,865 @@
+---
+/**
+ * Company Salary Breakdown Pages: /company/[slug]
+ * 8 illustrative company salary simulations with clear demarcation between
+ * verified offer letter facts and editable assumptions.
+ * Date of baseline: October 2026.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { site } from '../../config/site';
+import { calculateSalary } from '../../utils/salaryEngine';
+import { formatINR } from '../../utils/formatCurrency';
+
+interface CompanyTrack {
+  slug: string;
+  companyName: string;
+  roleTitle: string;
+  headlineCTC: number;
+  badgeText: string;
+  verifiedSourceDate: string;
+  sourceDoc: string;
+  sourceUrl: string;
+  summary: string;
+  facts: {
+    monthlyBasic: number;
+    annualBasic: number;
+    monthlyHRA: number;
+    annualHRA: number;
+    monthlySpecial: number;
+    annualSpecial: number;
+    variablePay: number;
+    joiningBonus: number;
+    monthlyEmployerPF: number;
+    annualEmployerPF: number;
+    monthlyGratuity: number;
+    annualGratuity: number;
+    otherEmployerCosts: number;
+  };
+  assumptions: {
+    variablePayoutDefaultPct: number;
+    variableExplanation: string;
+    ptMonthly: number;
+    insuranceNote: string;
+  };
+  faqs: { q: string; a: string }[];
+}
+
+export const COMPANY_TRACKS: CompanyTrack[] = [
+  {
+    slug: 'tcs-ninja',
+    companyName: 'Tata Consultancy Services (TCS)',
+    roleTitle: 'TCS Ninja (Graduate Trainee / ASE-T)',
+    headlineCTC: 336000,
+    badgeText: 'Illustrative TCS NQT Campus Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'TCS National Qualifier Test (NQT) Offer Architecture 2025–26 / 2026–27 Batch',
+    sourceUrl: 'https://www.tcs.com/careers/india/entry-level-hiring',
+    summary: 'The TCS Ninja track is the foundational entry-level engineering package offered to campus graduates through the TCS NQT hiring process.',
+    facts: {
+      monthlyBasic: 15000,
+      annualBasic: 180000,
+      monthlyHRA: 6000,
+      annualHRA: 72000,
+      monthlySpecial: 2200,
+      annualSpecial: 26400,
+      variablePay: 24000,
+      joiningBonus: 0,
+      monthlyEmployerPF: 1800,
+      annualEmployerPF: 21600,
+      monthlyGratuity: 721,
+      annualGratuity: 8654,
+      otherEmployerCosts: 7346,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Performance Pay is disbursed quarterly based on company business unit performance band and individual attendance.',
+      ptMonthly: 200,
+      insuranceNote: 'Includes group medical coverage and term life insurance pool premium of approx ₹7,346/year.',
+    },
+    faqs: [
+      {
+        q: 'What is the monthly in-hand salary for TCS Ninja?',
+        a: 'The estimated monthly bank credit for a TCS Ninja fresher is approximately ₹21,000 to ₹22,500 per month, depending on state Professional Tax and quarterly performance pay payout percentage.',
+      },
+      {
+        q: 'Does TCS Ninja pay income tax?',
+        a: 'No. At ₹3.36 LPA CTC, taxable income after the ₹75,000 standard deduction is approx ₹2.25 Lakh, well below the ₹12 Lakh threshold. Under Section 156 of the Income-tax Act, 2025, you receive a 100% tax rebate (₹0 tax liability).',
+      },
+      {
+        q: 'Is TCS Ninja variable pay guaranteed every month?',
+        a: 'No. The ₹24,000 annual performance pay is paid on a quarterly basis in arrears (approx ₹6,000/quarter) based on company performance milestones.',
+      },
+    ],
+  },
+  {
+    slug: 'tcs-digital',
+    companyName: 'Tata Consultancy Services (TCS)',
+    roleTitle: 'TCS Digital (Systems Engineer - Digital Cadre)',
+    headlineCTC: 700000,
+    badgeText: 'Illustrative TCS NQT Digital Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'TCS Digital NQT Campus Offer Grid & Corporate Engineering Slabs',
+    sourceUrl: 'https://www.tcs.com/careers/india/entry-level-hiring',
+    summary: 'The TCS Digital track is awarded to candidates demonstrating advanced programming, system design, and algorithmic problem-solving in the TCS NQT.',
+    facts: {
+      monthlyBasic: 23333,
+      annualBasic: 280000,
+      monthlyHRA: 9333,
+      annualHRA: 112000,
+      monthlySpecial: 17737,
+      annualSpecial: 212840,
+      variablePay: 50000,
+      joiningBonus: 0,
+      monthlyEmployerPF: 2800,
+      annualEmployerPF: 33600,
+      monthlyGratuity: 1122,
+      annualGratuity: 13460,
+      otherEmployerCosts: 8100,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Annual performance-linked incentive (approx ₹50,000) disbursed semi-annually based on project evaluation.',
+      ptMonthly: 200,
+      insuranceNote: 'Employer insurance contribution included in cost to company.',
+    },
+    faqs: [
+      {
+        q: 'What is the monthly take-home salary for TCS Digital?',
+        a: 'For TCS Digital (₹7.0 LPA), the monthly bank credit is approximately ₹47,000 to ₹49,500 per month under the New Tax Regime.',
+      },
+      {
+        q: 'How much tax is deducted on TCS Digital salary?',
+        a: 'Under the New Tax Regime (Tax Year 2026–27), with an annual CTC of ₹7.0 Lakh, your taxable income is approx ₹5.6 Lakh. Because taxable income is below ₹12 Lakh, you pay ₹0 in income tax due to Section 156 rebate.',
+      },
+    ],
+  },
+  {
+    slug: 'tcs-prime',
+    companyName: 'Tata Consultancy Services (TCS)',
+    roleTitle: 'TCS Prime (Senior Systems Engineer - Premier Cadre)',
+    headlineCTC: 900000,
+    badgeText: 'Illustrative TCS Prime Campus Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'TCS Prime Premier Campus Cadre Disclosure & Engineering Tier Framework',
+    sourceUrl: 'https://www.tcs.com/careers/india/entry-level-hiring',
+    summary: 'TCS Prime is the premier software engineering tier introduced for elite competitive programmers and top-tier institute talent.',
+    facts: {
+      monthlyBasic: 30000,
+      annualBasic: 360000,
+      monthlyHRA: 12000,
+      annualHRA: 144000,
+      monthlySpecial: 22800,
+      annualSpecial: 273600,
+      variablePay: 70000,
+      joiningBonus: 0,
+      monthlyEmployerPF: 2750,
+      annualEmployerPF: 33000,
+      monthlyGratuity: 1442,
+      annualGratuity: 17300,
+      otherEmployerCosts: 2100,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Project milestone performance pay (~₹70,000/yr) paid bi-annually.',
+      ptMonthly: 200,
+      insuranceNote: 'Comprehensive health coverage and disability cover included in package.',
+    },
+    faqs: [
+      {
+        q: 'What is the monthly in-hand salary for TCS Prime?',
+        a: 'A TCS Prime engineer with ₹9.0 LPA CTC receives approximately ₹61,000 to ₹64,500 monthly in their bank account under the New Tax Regime.',
+      },
+      {
+        q: 'Is TCS Prime salary taxable in 2026–27?',
+        a: 'Under the New Regime (Income-tax Act, 2025), taxable income remains below ₹12 Lakh, so the total income tax payable is ₹0 thanks to the enhanced Section 156 rebate.',
+      },
+    ],
+  },
+  {
+    slug: 'infosys-se',
+    companyName: 'Infosys Limited',
+    roleTitle: 'Infosys Systems Engineer (SE)',
+    headlineCTC: 360000,
+    badgeText: 'Illustrative Infosys Foundation Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'Infosys Campus Hiring SE Offer Annexure & Compensation Structure',
+    sourceUrl: 'https://www.infosys.com/careers/',
+    summary: 'The Systems Engineer (SE) position is the foundation track for fresher engineering graduates joining Infosys Mysore training campus.',
+    facts: {
+      monthlyBasic: 13500,
+      annualBasic: 162000,
+      monthlyHRA: 5400,
+      annualHRA: 64800,
+      monthlySpecial: 4821,
+      annualSpecial: 57852,
+      variablePay: 25380,
+      joiningBonus: 0,
+      monthlyEmployerPF: 1620,
+      annualEmployerPF: 19440,
+      monthlyGratuity: 649,
+      annualGratuity: 7788,
+      otherEmployerCosts: 22740,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Annual bonus / ex-gratia of 95% is paid monthly as an advance component with year-end reconciliation.',
+      ptMonthly: 200,
+      insuranceNote: 'Includes Infosys Welfare Trust contributions, Group Medical and Life Insurance pool.',
+    },
+    faqs: [
+      {
+        q: 'What is the in-hand salary during Infosys Mysore training?',
+        a: 'During Mysore training, accommodation and food deductions are adjusted, resulting in approx ₹21,000 to ₹22,000 monthly take-home. Post-deployment, bank credit is approx ₹23,500/mo.',
+      },
+      {
+        q: 'Is income tax deducted from Infosys 3.6 LPA CTC?',
+        a: 'No. Total annual earnings are well below the ₹12 Lakh tax-free threshold under the New Tax Regime, so no TDS is deducted.',
+      },
+    ],
+  },
+  {
+    slug: 'infosys-sp',
+    companyName: 'Infosys Limited',
+    roleTitle: 'Infosys Specialist Programmer (SP)',
+    headlineCTC: 950000,
+    badgeText: 'Illustrative Infosys HackWithInfy Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'Infosys Specialist Programmer Recruitment Dossier & Technical Offer Structure',
+    sourceUrl: 'https://www.infosys.com/careers/',
+    summary: 'Specialist Programmer is the premier engineering cadre at Infosys focused on cloud-native applications, generative AI, and advanced architecture.',
+    facts: {
+      monthlyBasic: 31667,
+      annualBasic: 380000,
+      monthlyHRA: 12667,
+      annualHRA: 152000,
+      monthlySpecial: 21805,
+      annualSpecial: 261660,
+      variablePay: 100000,
+      joiningBonus: 0,
+      monthlyEmployerPF: 3000,
+      annualEmployerPF: 36000,
+      monthlyGratuity: 1522,
+      annualGratuity: 18270,
+      otherEmployerCosts: 2070,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Annual performance incentive of ₹1,00,000 linked to individual and company business metrics.',
+      ptMonthly: 200,
+      insuranceNote: 'Comprehensive corporate medical cover for self and dependents.',
+    },
+    faqs: [
+      {
+        q: 'What is the monthly in-hand salary for Infosys Specialist Programmer?',
+        a: 'For ₹9.5 LPA CTC, an Infosys SP takes home approximately ₹63,000 to ₹67,000 monthly (fixed cash), with performance bonuses paid annually or semi-annually.',
+      },
+    ],
+  },
+  {
+    slug: 'wipro-turbo',
+    companyName: 'Wipro Limited',
+    roleTitle: 'Wipro Project Engineer (Elite Turbo)',
+    headlineCTC: 650000,
+    badgeText: 'Illustrative Wipro NTH Turbo Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'Wipro National Talent Hunt (NTH) Turbo Offer Annexure & Compensation Schedule',
+    sourceUrl: 'https://careers.wipro.com/',
+    summary: 'Wipro Turbo is the elevated campus engineering package offered to high scorers in the Wipro National Talent Hunt assessment.',
+    facts: {
+      monthlyBasic: 21667,
+      annualBasic: 260000,
+      monthlyHRA: 8667,
+      annualHRA: 104000,
+      monthlySpecial: 16333,
+      annualSpecial: 196000,
+      variablePay: 50000,
+      joiningBonus: 0,
+      monthlyEmployerPF: 2167,
+      annualEmployerPF: 26000,
+      monthlyGratuity: 1042,
+      annualGratuity: 12500,
+      otherEmployerCosts: 1500,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Annual variable bonus of ₹50,000 paid annually based on project evaluation.',
+      ptMonthly: 200,
+      insuranceNote: 'Medical insurance and employee accident coverage.',
+    },
+    faqs: [
+      {
+        q: 'What is the monthly take-home for Wipro Turbo?',
+        a: 'The expected monthly bank credit for Wipro Turbo (₹6.5 LPA) is approximately ₹44,000 to ₹46,500 per month.',
+      },
+    ],
+  },
+  {
+    slug: 'accenture-ase',
+    companyName: 'Accenture India',
+    roleTitle: 'Accenture Associate Software Engineer (ASE)',
+    headlineCTC: 450000,
+    badgeText: 'Illustrative Accenture Level 12 Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'Accenture Entry-Level Engineering Campus Offer Letter Annexure',
+    sourceUrl: 'https://www.accenture.com/in-en/careers',
+    summary: 'The Associate Software Engineer (ASE / Level 12) is the primary hiring track for software engineering graduates at Accenture India.',
+    facts: {
+      monthlyBasic: 15000,
+      annualBasic: 180000,
+      monthlyHRA: 6000,
+      annualHRA: 72000,
+      monthlySpecial: 11917,
+      annualSpecial: 143000,
+      variablePay: 45000,
+      joiningBonus: 22000,
+      monthlyEmployerPF: 1800,
+      annualEmployerPF: 21600,
+      monthlyGratuity: 721,
+      annualGratuity: 8654,
+      otherEmployerCosts: 2746,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Individual Performance Bonus (IPB) target is ~₹45,000/yr. First year includes a one-time joining bonus of ₹22,000.',
+      ptMonthly: 200,
+      insuranceNote: 'Flexible Benefit Plan (FBP) components can be customized by the employee.',
+    },
+    faqs: [
+      {
+        q: 'What is the monthly in-hand salary for Accenture ASE?',
+        a: 'An Accenture ASE receives approximately ₹30,000 to ₹32,000 monthly bank credit (excluding the one-time joining bonus and annual IPB payout).',
+      },
+      {
+        q: 'Is Accenture joining bonus included in the monthly salary?',
+        a: 'No. The ₹22,000 joining bonus is disbursed as a lump sum with the first or second month salary and has a clawback period of 12 months.',
+      },
+    ],
+  },
+  {
+    slug: 'cognizant-genc',
+    companyName: 'Cognizant Technology Solutions',
+    roleTitle: 'Cognizant Programmer Analyst Trainee (GenC)',
+    headlineCTC: 400000,
+    badgeText: 'Illustrative Cognizant Campus Baseline',
+    verifiedSourceDate: 'October 2026',
+    sourceDoc: 'Cognizant Campus Talent Acquisition Offer Breakup & Grade Structure',
+    sourceUrl: 'https://careers.cognizant.com/',
+    summary: 'Cognizant GenC is the foundational campus hiring track for engineering graduates joining as Programmer Analyst Trainees.',
+    facts: {
+      monthlyBasic: 13333,
+      annualBasic: 160000,
+      monthlyHRA: 5333,
+      annualHRA: 64000,
+      monthlySpecial: 11044,
+      annualSpecial: 132530,
+      variablePay: 35000,
+      joiningBonus: 0,
+      monthlyEmployerPF: 1600,
+      annualEmployerPF: 19200,
+      monthlyGratuity: 641,
+      annualGratuity: 7692,
+      otherEmployerCosts: 1578,
+    },
+    assumptions: {
+      variablePayoutDefaultPct: 100,
+      variableExplanation: 'Annual incentive scheme (~₹35,000) paid based on company and business unit performance multipliers.',
+      ptMonthly: 200,
+      insuranceNote: 'Cognizant medical benefit trust cover included in overall package.',
+    },
+    faqs: [
+      {
+        q: 'What is the in-hand salary for Cognizant GenC?',
+        a: 'A Cognizant GenC fresher receives approximately ₹27,000 to ₹29,000 per month in bank credit after EPF and Professional Tax deductions.',
+      },
+    ],
+  },
+];
+
+export async function getStaticPaths() {
+  return COMPANY_TRACKS.map((track) => ({
+    params: { slug: track.slug },
+    props: { track },
+  }));
+}
+
+interface Props {
+  track: CompanyTrack;
+}
+
+const { track } = Astro.props;
+
+// Calculate salary breakdown using the financial engine
+const breakdown = calculateSalary({
+  annualCTC: track.headlineCTC,
+  basicPercent: Math.round((track.facts.annualBasic / track.headlineCTC) * 100),
+  targetVariablePay: track.facts.variablePay,
+  joiningBonus: track.facts.joiningBonus,
+  pfPolicy: 'statutory_ceiling',
+  regime: 'new',
+});
+
+const title = `${track.companyName} (${track.roleTitle}) Salary Breakdown 2026–27 | Real In-Hand Pay`;
+const description = `Detailed salary structure for ${track.roleTitle} at ${track.companyName} (${formatINR(track.headlineCTC)} CTC). Illustrative package baseline, monthly bank credit (${formatINR(breakdown.monthlyInHand)}), EPF, and tax details.`;
+const canonicalPath = `/company/${track.slug}`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: `${track.roleTitle} — Real Salary Decomposition & In-Hand Analysis`,
+  description,
+  url: `${site.url}${canonicalPath}`,
+  author: { '@type': 'Organization', name: site.name },
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: track.faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="/ctc-to-inhand-calculator">Calculators</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>{track.roleTitle}</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Hero Summary Card & Assumptions Toggle ═══ -->
+      <div class="calc-inputs">
+        <div class="card card-hero-result">
+          <div class="hero-result-header">
+            <span class="hero-result-label">{track.companyName}</span>
+            <span class="badge badge-success">New Regime 2026–27</span>
+          </div>
+
+          <div class="hero-result-amount text-success">{formatINR(breakdown.monthlyInHand)} / mo</div>
+          <div class="hero-result-sub">
+            Estimated Monthly Bank Credit ({formatINR(breakdown.annualInHand)} annual take-home)
+          </div>
+
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">Headline CTC</span>
+              <span class="stat-val font-mono">{formatINR(track.headlineCTC)}</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Annual Income Tax</span>
+              <span class="stat-val font-mono text-success">₹0 (Sec 156 Rebate)</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly Employee PF</span>
+              <span class="stat-val font-mono">{formatINR(breakdown.monthlyEmployeePF)}</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly Gross</span>
+              <span class="stat-val font-mono">{formatINR(breakdown.monthlyGross)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Publicly Reported Baseline vs Editable Assumptions Notice & Independent Disclaimer -->
+        <div class="card mt-lg">
+          <div class="badge badge-accent mb-xs">Illustrative Simulation</div>
+          <h3 class="title-sm mb-xs">Publicly Reported Package Baseline</h3>
+          <p class="body-sm text-muted mb-sm">
+            {track.summary}
+          </p>
+          <div class="source-audit-box p-sm bg-soft border rounded caption">
+            <p class="mb-xxs"><strong>Baseline Reference:</strong> {track.sourceDoc}</p>
+            <p class="mb-xxs"><strong>Reference Period:</strong> {track.verifiedSourceDate}</p>
+            <p class="mb-0"><strong>Careers Portal:</strong> <a href={track.sourceUrl} target="_blank" rel="noopener noreferrer" class="link-underline">Visit {track.companyName} Careers</a></p>
+          </div>
+          <div class="disclaimer-callout mt-sm p-sm border rounded bg-surface caption">
+            <strong>Independent Disclaimer:</strong> PayDecode is an independent educational tool and is <strong>unaffiliated with {track.companyName}</strong> or any named employer. Actual compensation structures, basic-pay percentages, variable bonus distributions, and retirals vary across joining batches, business units, job bands, and individual contracts. Figures shown are illustrative simulations based on publicly reported compensation architectures.
+          </div>
+        </div>
+
+        <!-- Customizer Link -->
+        <div class="card mt-lg">
+          <h3 class="title-sm mb-xs">Want to Simulate Custom Scenarios?</h3>
+          <p class="body-sm text-muted mb-md">
+            Test different variable bonus payouts, city rents, or compare this offer against another company offer letter.
+          </p>
+          <a href={`/ctc-to-inhand-calculator`} class="btn btn-primary btn-block">
+            Open Interactive CTC Calculator →
+          </a>
+        </div>
+
+        <!-- Other Company Tracks -->
+        <div class="card mt-lg bg-soft">
+          <h3 class="title-sm mb-xs">Other Popular Company Packages</h3>
+          <div class="company-links-list mt-sm">
+            {COMPANY_TRACKS.filter((t) => t.slug !== track.slug).map((c) => (
+              <a href={`/company/${c.slug}`} class="company-sub-link">
+                <span>{c.roleTitle}</span>
+                <span class="font-mono text-muted">{formatINR(c.headlineCTC)}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ Right: Compensation Architecture & Decomposition ═══ -->
+      <div class="calc-results">
+
+        <div class="card">
+          <div class="badge badge-primary mb-xs">Illustrative Package Baseline (Editable Assumptions)</div>
+          <h1 class="display-sm mb-xs">{track.roleTitle} Salary Structure</h1>
+          <p class="body-sm text-muted mb-xl">
+            Complete compensation architecture for ₹{track.headlineCTC.toLocaleString('en-IN')} CTC under the Income-tax Act, 2025.
+          </p>
+
+          <!-- Distinction Legend -->
+          <div class="legend-bar mb-lg p-sm bg-soft border rounded">
+            <span class="legend-item"><span class="bullet bullet-verified">●</span> <strong>Illustrative Package Baseline</strong> (Publicly reported contract structure)</span>
+            <span class="legend-item"><span class="bullet bullet-assumption">●</span> <strong>Editable Assumption</strong> (Variable payout, state PT)</span>
+          </div>
+
+          <h2 class="title-sm mb-sm">1. Cash Salary Components (Monthly & Annual)</h2>
+          <div class="table-container mb-lg">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th>Classification</th>
+                  <th class="text-right">Monthly</th>
+                  <th class="text-right">Annual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Basic Salary</td>
+                  <td><span class="badge badge-success">Reported Structure</span></td>
+                  <td class="text-right font-mono">{formatINR(track.facts.monthlyBasic)}</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.annualBasic)}</td>
+                </tr>
+                <tr>
+                  <td>House Rent Allowance (HRA)</td>
+                  <td><span class="badge badge-success">Reported Structure</span></td>
+                  <td class="text-right font-mono">{formatINR(track.facts.monthlyHRA)}</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.annualHRA)}</td>
+                </tr>
+                <tr>
+                  <td>Special / City Allowance</td>
+                  <td><span class="badge badge-success">Reported Structure</span></td>
+                  <td class="text-right font-mono">{formatINR(track.facts.monthlySpecial)}</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.annualSpecial)}</td>
+                </tr>
+                <tr>
+                  <td>Performance Variable Pay (Target)</td>
+                  <td><span class="badge badge-accent">Assumption</span></td>
+                  <td class="text-right font-mono">{formatINR(Math.round(track.facts.variablePay / 12))}</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.variablePay)}</td>
+                </tr>
+                {track.facts.joiningBonus > 0 && (
+                  <tr>
+                    <td>One-Time Joining Bonus</td>
+                    <td><span class="badge badge-accent">One-Time (Year 1)</span></td>
+                    <td class="text-right font-mono">—</td>
+                    <td class="text-right font-mono">{formatINR(track.facts.joiningBonus)}</td>
+                  </tr>
+                )}
+                <tr style="font-weight:700; background:var(--color-surface-soft);">
+                  <td>Total Cash Gross (Before Deductions)</td>
+                  <td>—</td>
+                  <td class="text-right font-mono">{formatINR(breakdown.monthlyGross)}</td>
+                  <td class="text-right font-mono">{formatINR(breakdown.annualGross)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="title-sm mb-sm">2. Monthly Payroll Deductions</h2>
+          <div class="table-container mb-lg">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Deduction Item</th>
+                  <th>Statutory Mandate</th>
+                  <th class="text-right">Monthly</th>
+                  <th class="text-right">Annual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Employee Provident Fund (12%)</td>
+                  <td class="caption">EPF Act, 1952 (Capped Ceiling)</td>
+                  <td class="text-right font-mono text-danger">{formatINR(breakdown.monthlyEmployeePF)}</td>
+                  <td class="text-right font-mono text-danger">{formatINR(breakdown.employeePF)}</td>
+                </tr>
+                <tr>
+                  <td>Income Tax (Monthly TDS)</td>
+                  <td class="caption">Income-tax Act, 2025 (Sec 156 Rebate)</td>
+                  <td class="text-right font-mono text-success">₹0</td>
+                  <td class="text-right font-mono text-success">₹0</td>
+                </tr>
+                <tr>
+                  <td>Professional Tax (PT)</td>
+                  <td class="caption">State Tax Schedule (₹200/mo standard)</td>
+                  <td class="text-right font-mono text-danger">{formatINR(breakdown.monthlyProfessionalTax)}</td>
+                  <td class="text-right font-mono text-danger">{formatINR(breakdown.professionalTax)}</td>
+                </tr>
+                <tr style="font-weight:700; background:rgba(5, 177, 105, 0.08);">
+                  <td>Net Monthly Bank Credit (In-Hand Cash)</td>
+                  <td><span class="badge badge-success">Bank Credit</span></td>
+                  <td class="text-right font-mono text-success">{formatINR(breakdown.monthlyInHand)}</td>
+                  <td class="text-right font-mono text-success">{formatINR(breakdown.annualInHand)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="title-sm mb-sm">3. Employer Non-Cash Retirals & Benefits (In CTC)</h2>
+          <div class="table-container mb-base">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Employer Cost Item</th>
+                  <th>Legal Status</th>
+                  <th class="text-right">Monthly</th>
+                  <th class="text-right">Annual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Employer PF Contribution (12%)</td>
+                  <td class="caption">Statutory Retiral (EPF + EPS)</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.monthlyEmployerPF)}</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.annualEmployerPF)}</td>
+                </tr>
+                <tr>
+                  <td>Gratuity Accrual Provision (~4.81%)</td>
+                  <td class="caption">Payment of Gratuity Act, 1972</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.monthlyGratuity)}</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.annualGratuity)}</td>
+                </tr>
+                <tr>
+                  <td>Group Insurance & Welfare Fund</td>
+                  <td class="caption">{track.assumptions.insuranceNote}</td>
+                  <td class="text-right font-mono">{formatINR(Math.round(track.facts.otherEmployerCosts / 12))}</td>
+                  <td class="text-right font-mono">{formatINR(track.facts.otherEmployerCosts)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- Editorial Notes on Offer Nuances -->
+        <div class="card mt-lg">
+          <h2 class="title-md mb-xs">Offer Letter Nuances & Salary Realities</h2>
+          <div class="takeaways-list mt-md">
+            <div class="takeaway-box p-md bg-soft border rounded mb-sm">
+              <h3 class="title-sm mb-xxs">1. Fixed Cash vs CTC Discrepancy</h3>
+              <p class="body-sm text-body">
+                Out of the headline ₹{track.headlineCTC.toLocaleString('en-IN')} CTC, the total annual fixed cash component credited to your bank account is <strong>{formatINR(breakdown.annualInHand)}</strong>.
+                The remaining amount of {formatINR(track.headlineCTC - breakdown.annualInHand)} represents employer retiral contributions (EPF, Gratuity), health insurance, and variable performance incentives.
+              </p>
+            </div>
+
+            <div class="takeaway-box p-md bg-soft border rounded mb-sm">
+              <h3 class="title-sm mb-xxs">2. Variable Pay Timing</h3>
+              <p class="body-sm text-body">
+                {track.assumptions.variableExplanation} Do not rely on variable pay for monthly rent or EMI commitments.
+              </p>
+            </div>
+
+            <div class="takeaway-box p-md bg-soft border rounded">
+              <h3 class="title-sm mb-xxs">3. Zero Tax under New Regime 2026–27</h3>
+              <p class="body-sm text-body">
+                Because your taxable income after standard deduction is well below ₹12 Lakh, you pay <strong>₹0 income tax</strong> under the New Tax Regime. Choosing the Old Tax Regime would require submitting rent receipts and 80C investments unnecessarily.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQs -->
+        <div class="card mt-lg">
+          <h2 class="title-md mb-sm">Frequently Asked Questions</h2>
+          <div class="faq-accordion mt-md">
+            {track.faqs.map((f, i) => (
+              <details class="faq-item" open={i === 0}>
+                <summary class="faq-question">{f.q}</summary>
+                <div class="faq-answer">
+                  <p>{f.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        <!-- Legal & Non-Affiliation Disclaimer Banner -->
+        <div class="card mt-lg p-md border rounded bg-soft">
+          <h3 class="title-xs text-muted mb-xxs">Independent Compensation Analysis & Non-Affiliation Notice</h3>
+          <p class="body-xs text-muted mb-0">
+            PayDecode is an independent educational tool and is <strong>unaffiliated with, endorsed by, or sponsored by {track.companyName}</strong> or any named employer. All trademarks and company names are the property of their respective holders. The package breakdown displayed above represents an illustrative simulation based on publicly reported compensation architectures and candidate offers. Actual salary offers, basic-pay percentages, variable bonus distributions, and retirals vary across joining batches, roles, job bands, and business units.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 440px 1fr;
+    }
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .legend-bar {
+    display: flex;
+    gap: var(--space-lg);
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+
+  .bullet-verified { color: #05b169; }
+  .bullet-assumption { color: #e2b714; }
+
+  .company-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .company-sub-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    font-size: 13px;
+    color: var(--color-body-strong);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .company-sub-link:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+  .font-mono { font-family: var(--font-mono); }
+  .caption { font-size: 12px; color: var(--color-muted); }
+
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    background: var(--color-canvas);
+  }
+
+  .faq-question {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-body);
+  }
+</style>

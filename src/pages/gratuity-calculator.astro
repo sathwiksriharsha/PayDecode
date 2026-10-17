@@ -1,0 +1,468 @@
+---
+/**
+ * Gratuity Calculator (Payment of Gratuity Act, 1972)
+ * Calculates indicative gratuity payout, statutory tax exemption limits (₹20 Lakh),
+ * and monthly CTC accrual.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Gratuity Calculator 2026–27 | Formula, 5-Year Rule & Tax Exemption Limit';
+const description = 'Calculate your gratuity payout in India using the official 15/26 formula under the Payment of Gratuity Act. Check tax-exempt limits (up to ₹20 Lakh) and 5-year eligibility rules.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/gratuity-calculator`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: 'Gratuity Calculator', item: `${site.url}/gratuity-calculator` },
+  ],
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'What is the formula to calculate gratuity in India?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'For employees covered under the Payment of Gratuity Act, 1972, the formula is: Gratuity = (15 × Last Drawn Monthly Basic + DA × Completed Years of Service) ÷ 26.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the minimum service period required for gratuity eligibility?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'An employee must complete at least 5 continuous years of service with the same employer to become eligible for gratuity. However, the 5-year requirement is waived in the event of death or permanent disablement.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is gratuity taxable in India?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Gratuity received by government employees is completely tax-free. For private sector employees covered under the Act, gratuity is tax-exempt up to a lifetime statutory ceiling of ₹20,00,000 under Section 10(10). Any amount exceeding ₹20 Lakh is taxable as income from salary.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/gratuity-calculator"
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Gratuity Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Input Panel ═══ -->
+      <div class="calc-inputs">
+        <div class="card">
+          <div class="badge badge-accent mb-sm">Statutory Retirement Benefit</div>
+          <h1 class="display-sm mb-xs">Gratuity Calculator</h1>
+          <p class="body-sm text-muted mb-xl">
+            Payment of Gratuity Act, 1972. Calculate your lump-sum payout upon leaving an organization or retirement.
+          </p>
+
+          <!-- Last Drawn Monthly Basic -->
+          <div class="input-group">
+            <label for="gratuity-basic" class="input-label">
+              Last Drawn Monthly Basic Salary (+ DA)
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">Under the Act, salary means Basic Salary plus Dearness Allowance (DA). Special allowances and bonuses are excluded.</span>
+              </span>
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input type="text" id="gratuity-basic" class="input input-number" value="60000" placeholder="e.g. 60,000" />
+            </div>
+          </div>
+
+          <!-- Years of Service -->
+          <div class="input-group">
+            <label for="gratuity-years" class="input-label">Completed Years of Service</label>
+            <input type="number" id="gratuity-years" class="input" value="6" min="1" max="50" step="1" />
+            <p class="caption text-muted mt-xs">
+              If service period in the final year exceeds 6 months (e.g. 5 years 7 months), it rounds up to 6 years.
+            </p>
+          </div>
+
+          <!-- Coverage Type -->
+          <div class="input-group">
+            <label class="input-label">Establishment Coverage</label>
+            <div class="radio-group">
+              <label class="radio-pill">
+                <input type="radio" name="coverage" value="covered" checked /> Covered under Act (15/26)
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="coverage" value="not-covered" /> Not Covered (15/30)
+              </label>
+            </div>
+            <p class="caption text-muted mt-xs">
+              Most registered companies with 10+ employees are covered under the Act.
+            </p>
+          </div>
+
+          <button id="calc-gratuity-btn" class="btn btn-primary btn-block mt-md">
+            Calculate Gratuity
+          </button>
+        </div>
+
+        <!-- Ad Slot -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-gratuity-1">
+            <div class="ad-placeholder">
+              <span>Retirement Planning & Long-Term Wealth Preservation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Right: Result Panel ═══ -->
+      <div class="calc-results">
+        <!-- Result Hero Card -->
+        <div class="card card-hero-result" id="gratuity-hero-card">
+          <div class="hero-result-header">
+            <span class="hero-result-label">Estimated Gratuity Payable</span>
+            <span class="badge badge-success" id="eligibility-badge">Eligible (≥ 5 Years)</span>
+          </div>
+
+          <div class="hero-result-amount text-success" id="res-gratuity-amount">₹2,07,692</div>
+          <div class="hero-result-sub" id="res-gratuity-sub">Tax-Free Lump Sum (under ₹20 Lakh limit)</div>
+
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">Tax Exemption</span>
+              <span class="stat-val text-success" id="res-exempt-limit">100% Tax Free</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Taxable Portion</span>
+              <span class="stat-val text-white" id="res-taxable-amount">₹0</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly CTC Accrual</span>
+              <span class="stat-val" id="res-monthly-accrual">₹2,885 / mo</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Statutory Max Cap</span>
+              <span class="stat-val">₹20,00,000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Warning / Eligibility Note -->
+        <div class="card mt-lg" id="eligibility-notice-box">
+          <h3 class="title-sm mb-xs" id="notice-title">Continuous Service Requirement</h3>
+          <p class="body-sm text-body mb-xs" id="notice-desc">
+            You have completed <strong>6 years</strong> of continuous service, which satisfies the mandatory 5-year eligibility criteria under Section 4(1) of the Payment of Gratuity Act, 1972.
+          </p>
+          <div class="caption text-muted">
+            Note: Gratuity is paid upon termination of employment (resignation, retirement, superannuation, or VRS).
+          </div>
+        </div>
+
+        <!-- Formula Breakdown Card -->
+        <div class="card mt-lg">
+          <h2 class="title-sm mb-md">Calculation Formula Breakdown</h2>
+          <div class="formula-box mb-md">
+            <code>Gratuity = (15 × Monthly Basic × Years of Service) ÷ 26</code>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <tbody>
+                <tr>
+                  <td>Monthly Basic Salary</td>
+                  <td class="text-right font-mono" id="tbl-basic">₹60,000</td>
+                </tr>
+                <tr>
+                  <td>15 Days Salary (Monthly Basic × 15 ÷ 26)</td>
+                  <td class="text-right font-mono" id="tbl-fifteen-days">₹34,615</td>
+                </tr>
+                <tr>
+                  <td>Completed Years of Service</td>
+                  <td class="text-right font-mono" id="tbl-years">6 Years</td>
+                </tr>
+                <tr style="font-weight:700; background:rgba(5, 177, 105, 0.08);">
+                  <td>Total Gratuity Payable</td>
+                  <td class="text-right font-mono text-success" id="tbl-total">₹2,07,692</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ad Slot 2 -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-gratuity-2">
+            <div class="ad-placeholder">
+              <span>High Return Senior Citizen & Fixed Deposit Schemes</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══ SEO Educational Article ═══ -->
+    <section class="seo-guide mt-xxl pt-xl border-top">
+      <div class="max-content-text">
+        <h2 class="display-sm mb-md">Everything You Need to Know About Gratuity in India</h2>
+        <p class="body-md text-body mb-lg">
+          Gratuity is a statutory monetary benefit provided by employers in India under the <strong>Payment of Gratuity Act, 1972</strong> as a token of appreciation for long and meritorious service.
+        </p>
+
+        <h3 class="title-lg mb-sm">The 26-Day Working Month Rule</h3>
+        <p class="body-md text-body mb-base">
+          Under Indian labour jurisprudence, for the purpose of calculating 15 days of salary, a month is legally deemed to comprise <strong>26 working days</strong> (excluding 4 weekly holidays/Sundays). Therefore, your daily wage rate is computed as <code>Monthly Basic ÷ 26</code>, and 15 days of wages equals <code>(Monthly Basic × 15) ÷ 26</code>.
+        </p>
+
+        <h3 class="title-lg mb-sm">Tax Exemption on Gratuity</h3>
+        <p class="body-md text-body mb-lg">
+          Under Section 10(10) of the Income-tax Act, gratuity received by private sector employees is exempt from income tax up to a maximum lifetime ceiling of <strong>₹20,00,000 (Twenty Lakh Rupees)</strong>. Any amount in excess of ₹20 Lakh is added to taxable salary income for that financial year and taxed according to your applicable slab rate.
+        </p>
+
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 460px 1fr;
+    }
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .formula-box {
+    background: var(--color-surface-soft);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--rounded-md);
+    border: 1px solid var(--color-hairline);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-ink);
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+  .text-white { color: #ffffff !important; }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-content-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+</style>
+
+<script>
+  import { parseSalaryInput, formatINR } from '../utils/formatCurrency';
+  import { calculateGratuityAccrual } from '../utils/gratuityEngine';
+
+  const basicInput = document.getElementById('gratuity-basic') as HTMLInputElement;
+  const yearsInput = document.getElementById('gratuity-years') as HTMLInputElement;
+  const calcBtn = document.getElementById('calc-gratuity-btn') as HTMLButtonElement;
+
+  // Outputs
+  const eligibilityBadge = document.getElementById('eligibility-badge')!;
+  const resGratuityAmount = document.getElementById('res-gratuity-amount')!;
+  const resGratuitySub = document.getElementById('res-gratuity-sub')!;
+  const resExemptLimit = document.getElementById('res-exempt-limit')!;
+  const resTaxableAmount = document.getElementById('res-taxable-amount')!;
+  const resMonthlyAccrual = document.getElementById('res-monthly-accrual')!;
+
+  const noticeBox = document.getElementById('eligibility-notice-box')!;
+  const noticeTitle = document.getElementById('notice-title')!;
+  const noticeDesc = document.getElementById('notice-desc')!;
+
+  const tblBasic = document.getElementById('tbl-basic')!;
+  const tblFifteenDays = document.getElementById('tbl-fifteen-days')!;
+  const tblYears = document.getElementById('tbl-years')!;
+  const tblTotal = document.getElementById('tbl-total')!;
+
+  function runGratuityCalc() {
+    const monthlyBasic = parseSalaryInput(basicInput.value) || 0;
+    const years = Number(yearsInput.value) || 0;
+    const isCovered = (document.querySelector('input[name="coverage"]:checked') as HTMLInputElement)?.value === 'covered';
+
+    const denominator = isCovered ? 26 : 30;
+    const fifteenDays = Math.round((monthlyBasic * 15) / denominator);
+    const totalGratuity = Math.round(fifteenDays * years);
+
+    // Statutory tax exemption limit is ₹20 Lakh
+    const maxExempt = 2000000;
+    const taxablePortion = Math.max(0, totalGratuity - maxExempt);
+    const exemptPortion = Math.min(totalGratuity, maxExempt);
+
+    // Monthly CTC accrual (from engine)
+    const accrual = calculateGratuityAccrual(monthlyBasic);
+
+    resGratuityAmount.textContent = formatINR(totalGratuity);
+    tblBasic.textContent = formatINR(monthlyBasic);
+    tblFifteenDays.textContent = formatINR(fifteenDays);
+    tblYears.textContent = `${years} Years`;
+    tblTotal.textContent = formatINR(totalGratuity);
+    resMonthlyAccrual.textContent = `${formatINR(accrual.monthlyAccrual)} / mo`;
+
+    if (years >= 5) {
+      eligibilityBadge.textContent = 'Eligible (≥ 5 Years)';
+      eligibilityBadge.className = 'badge badge-success';
+      noticeTitle.textContent = 'Eligible for Gratuity';
+      noticeDesc.innerHTML = `You have completed <strong>${years} years</strong> of continuous service, meeting the statutory 5-year eligibility requirement under Section 4(1).`;
+    } else {
+      eligibilityBadge.textContent = 'Not Yet Eligible (< 5 Years)';
+      eligibilityBadge.className = 'badge badge-accent';
+      noticeTitle.textContent = 'Eligibility Note (< 5 Years)';
+      noticeDesc.innerHTML = `You have completed <strong>${years} years</strong> of service. Under Section 4(1), an employee must complete at least 5 years of continuous service to be legally entitled to gratuity upon resignation, unless service ends due to death or disablement.`;
+    }
+
+    if (taxablePortion > 0) {
+      resExemptLimit.textContent = `${formatINR(exemptPortion)} Exempt`;
+      resTaxableAmount.textContent = `${formatINR(taxablePortion)} Taxable`;
+      resGratuitySub.textContent = `₹20 Lakh is tax-exempt. Excess ${formatINR(taxablePortion)} is taxable as salary income.`;
+    } else {
+      resExemptLimit.textContent = '100% Tax Free';
+      resTaxableAmount.textContent = '₹0';
+      resGratuitySub.textContent = 'Completely Tax-Free Lump Sum (within ₹20 Lakh statutory ceiling)';
+    }
+  }
+
+  basicInput.addEventListener('input', runGratuityCalc);
+  yearsInput.addEventListener('input', runGratuityCalc);
+  document.querySelectorAll('input[name="coverage"]').forEach((el) => el.addEventListener('change', runGratuityCalc));
+  calcBtn.addEventListener('click', runGratuityCalc);
+
+  // Initial Run
+  runGratuityCalc();
+</script>

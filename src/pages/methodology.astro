@@ -1,0 +1,150 @@
+---
+/**
+ * Methodology Page — Transparent explanation of mathematical algorithms,
+ * CTC decomposition identity, and payroll calculation logic.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Calculation Methodology & Payroll Engine Architecture';
+const description = 'Detailed documentation of PayDecode\'s financial algorithms, CTC decomposition identity, EPFO wage ceiling rules, and Income-tax Act 2025 slab calculations.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/methodology`,
+  inLanguage: 'en-IN',
+  author: { '@type': 'Organization', name: site.name },
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/methodology"
+  jsonLd={jsonLd}
+>
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Methodology</span>
+    </nav>
+  </div>
+
+  <div class="container pb-xxl">
+    <div class="max-content-text">
+      <div class="badge badge-accent mb-sm">Pure TypeScript Engine</div>
+      <h1 class="display-sm mb-sm">Calculation Methodology & Architecture</h1>
+      <p class="body-md text-muted mb-xl">
+        Last reviewed: 17 October 2026 • Effective Tax Year 2026–27 (Income-tax Act, 2025)
+      </p>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">1. Core CTC Decomposition Identity</h2>
+        <p class="body-md text-body mb-base">
+          Cost to Company (CTC) is a corporate financial expenditure metric, not cash salary. To model offer letters truthfully without double-counting, PayDecode defines CTC using the following strict accounting identity:
+        </p>
+
+        <div class="formula-card mb-base">
+          <code>
+            CTC = FixedCashCompensation + TargetVariablePay + JoiningBonus<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ EmployerPF + GratuityAccrual + EmployerNPS + OtherEmployerCosts
+          </code>
+        </div>
+
+        <p class="body-md text-body mb-base">
+          From this identity, <strong>Annual Fixed Cash Salary</strong> is computed as:
+        </p>
+
+        <div class="formula-card mb-base">
+          <code>
+            FixedCash = CTC - (EmployerPF + GratuityAccrual + EmployerNPS + OtherCosts) - TargetVariable - JoiningBonus
+          </code>
+        </div>
+
+        <p class="body-md text-body">
+          Monthly bank credit (take-home salary) is then calculated by subtracting only <em>employee-side deductions</em>:
+        </p>
+
+        <div class="formula-card mt-base">
+          <code>
+            MonthlyTakeHome = (FixedCash / 12) - MonthlyEmployeePF - MonthlyProfessionalTax - MonthlyTDS
+          </code>
+        </div>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">2. Employee Provident Fund (EPF) Rules</h2>
+        <p class="body-md text-body mb-base">
+          Effective <strong>17 September 2026</strong>, the Ministry of Labour and Employment updated the statutory EPFO wage ceiling from ₹15,000 to <strong>₹25,000 per month</strong> (via Gazette Notification & PIB Release).
+        </p>
+        <ul class="seo-list mb-base">
+          <li><strong>Statutory Ceiling Scenario:</strong> PF wage base is <code>min(MonthlyBasic, ₹25,000)</code>. Employee contribution is 12% = ₹3,000/month. Employer contribution is ₹3,000/month (allocated between EPS at 8.33% and EPF at 3.67%).</li>
+          <li><strong>Full Basic Scenario:</strong> Many technology enterprises deduct 12% on the entire basic salary without capping at ₹25,000. PayDecode supports this configuration explicitly.</li>
+          <li><strong>Non-Double-Counting Guard:</strong> Employer PF is an employer expense already removed during fixed cash derivation; it is never deducted a second time from employee take-home pay.</li>
+        </ul>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">3. Income Tax & Marginal Relief (Income-tax Act, 2025)</h2>
+        <p class="body-md text-body mb-base">
+          For Tax Year 2026–27, tax is calculated under the Income-tax Act, 2025:
+        </p>
+        <ul class="seo-list mb-base">
+          <li><strong>Section 19:</strong> Standard deduction of ₹75,000 under the New Regime and ₹50,000 under the Old Regime.</li>
+          <li><strong>Section 202:</strong> Slab rates of 0% (up to 4L), 5% (4L–8L), 10% (8L–12L), 15% (12L–16L), 20% (16L–20L), 25% (20L–24L), and 30% (above 24L).</li>
+          <li><strong>Section 156 (Rebate & Marginal Relief):</strong> Resident individuals with taxable income up to ₹12,00,000 receive a rebate up to ₹60,000 (resulting in zero tax). For taxable income just above ₹12 Lakh, marginal relief ensures that tax after rebate does not exceed the excess income over ₹12 Lakh.</li>
+          <li><strong>Health & Education Cess:</strong> 4% applied to net tax after rebate and surcharge.</li>
+        </ul>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">4. Reverse Salary Engine (Binary Search)</h2>
+        <p class="body-md text-body mb-base">
+          Because the forward function <code>f(CTC) &rarr; MonthlyTakeHome</code> is strictly monotonically non-decreasing, the reverse calculator employs a deterministic binary search with a tolerance of &plusmn;₹100, guaranteed to converge in under 25 iterations without false-approximation shortcuts.
+        </p>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">5. Engineering Scope & Exclusions</h2>
+        <p class="body-md text-body mb-base">
+          PayDecode is designed for ordinary Indian salaried employment compensation. The current engine deliberately excludes:
+        </p>
+        <ul class="seo-list">
+          <li>Capital gains taxation (stocks, mutual funds, real estate).</li>
+          <li>ESOP perquisite tax at vesting/exercise (governed by Fair Market Value on exercise date).</li>
+          <li>Dual-employment income or mid-year employer transitions without consolidated Form 12B.</li>
+          <li>Section 89 tax relief for salary arrears.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .max-content-text {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .formula-card {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-ink);
+    overflow-x: auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+</style>

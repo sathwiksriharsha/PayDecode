@@ -1,0 +1,145 @@
+---
+/**
+ * Tax Rules Reference Guide (Tax Year 2026–27)
+ * Comprehensive breakdown of Income-tax Act, 2025 sections, slabs, and deductions.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Income Tax Rules 2026–27 | Slabs, Surcharge, Rebate & Sections';
+const description = 'Official reference guide for Tax Year 2026–27 under the Income-tax Act, 2025. Slab rates under Section 202, Section 19 standard deduction, Section 156 rebate, and Section 124 NPS.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/tax-rules`,
+  inLanguage: 'en-IN',
+  author: { '@type': 'Organization', name: site.name },
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/tax-rules"
+  jsonLd={jsonLd}
+>
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Tax Rules 2026–27</span>
+    </nav>
+  </div>
+
+  <div class="container pb-xxl">
+    <div class="max-content-text">
+      <div class="badge badge-accent mb-sm">Statutory Legal Framework</div>
+      <h1 class="display-sm mb-sm">Tax Year 2026–27 Statutory Reference</h1>
+      <p class="body-md text-muted mb-xl">
+        Governed by the <strong>Income-tax Act, 2025</strong> (effective 1 April 2026). Sourced from the Income Tax Department of India.
+      </p>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">1. New Tax Regime Slabs (Section 202)</h2>
+        <p class="body-md text-body mb-base">
+          Under Section 202 of the Income-tax Act, 2025, ordinary taxable income for individuals is taxed at the following marginal rates:
+        </p>
+
+        <div class="table-container mb-base">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Taxable Income Slab</th>
+                <th class="text-right">Marginal Rate</th>
+                <th>Statutory Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Up to ₹4,00,000</td><td class="text-right font-mono">0% (Nil)</td><td>Section 202</td></tr>
+              <tr><td>₹4,00,001 – ₹8,00,000</td><td class="text-right font-mono">5%</td><td>Section 202</td></tr>
+              <tr><td>₹8,00,001 – ₹12,00,000</td><td class="text-right font-mono">10%</td><td>Section 202</td></tr>
+              <tr><td>₹12,00,001 – ₹16,00,000</td><td class="text-right font-mono">15%</td><td>Section 202</td></tr>
+              <tr><td>₹16,00,001 – ₹20,00,000</td><td class="text-right font-mono">20%</td><td>Section 202</td></tr>
+              <tr><td>₹20,00,001 – ₹24,00,000</td><td class="text-right font-mono">25%</td><td>Section 202</td></tr>
+              <tr><td>Above ₹24,00,000</td><td class="text-right font-mono">30%</td><td>Section 202</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">2. Standard Deduction (Section 19)</h2>
+        <p class="body-md text-body mb-base">
+          Section 19 governs deductions from salary income:
+        </p>
+        <ul class="seo-list">
+          <li><strong>New Tax Regime:</strong> ₹75,000 flat standard deduction for all salaried individuals and pensioners.</li>
+          <li><strong>Old Tax Regime:</strong> ₹50,000 standard deduction.</li>
+          <li><em>Scope Limitation:</em> The deduction is limited to actual gross salary received if gross salary is less than the deduction amount.</li>
+        </ul>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">3. Resident Tax Rebate & Marginal Relief (Section 156)</h2>
+        <p class="body-md text-body mb-base">
+          Section 156 replaces legacy Section 87A of the 1961 Act:
+        </p>
+        <ul class="seo-list">
+          <li><strong>Full Rebate:</strong> Resident individuals with total income not exceeding ₹12,00,000 receive a rebate of 100% of the income tax payable (capped at ₹60,000).</li>
+          <li><strong>Marginal Relief:</strong> Where total taxable income slightly exceeds ₹12,00,000, the rebate reduces tax so that the net tax payable does not exceed the income in excess of ₹12,00,000.</li>
+        </ul>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">4. Employer NPS Deduction (Section 124)</h2>
+        <p class="body-md text-body mb-base">
+          Replaces legacy Section 80CCD(2):
+        </p>
+        <ul class="seo-list">
+          <li>Under the New Tax Regime, employer contributions to the National Pension System (NPS) are deductible from taxable income up to <strong>14% of salary</strong> (Basic + DA) for Central/State Government and private corporate employees.</li>
+          <li>Under the Old Regime, the deduction limit is 10% for non-government employees.</li>
+        </ul>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">5. Surcharge & Cess Structure</h2>
+        <div class="table-container mb-base">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Total Income Band</th>
+                <th class="text-right">Surcharge Rate (New Regime)</th>
+                <th class="text-right">Surcharge Rate (Old Regime)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Up to ₹50 Lakh</td><td class="text-right font-mono">0%</td><td class="text-right font-mono">0%</td></tr>
+              <tr><td>₹50 Lakh – ₹1 Crore</td><td class="text-right font-mono">10%</td><td class="text-right font-mono">10%</td></tr>
+              <tr><td>₹1 Crore – ₹2 Crore</td><td class="text-right font-mono">15%</td><td class="text-right font-mono">15%</td></tr>
+              <tr><td>Above ₹2 Crore</td><td class="text-right font-mono">25% (Capped)</td><td class="text-right font-mono">25% / 37%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption text-muted">
+          Health and Education Cess of 4% applies to the aggregate of income tax and surcharge across all brackets.
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .max-content-text {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+</style>

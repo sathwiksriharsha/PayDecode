@@ -1,0 +1,145 @@
+---
+/**
+ * Contact Us Page
+ * Direct feedback, bug reports, statutory correction submissions, and inquiries.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Contact Us — Feedback & Inquiries';
+const description = 'Get in touch with the PayDecode engineering team. Report calculation bugs, suggest features, or submit statutory tax corrections.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/contact`,
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/contact"
+  jsonLd={jsonLd}
+>
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Contact</span>
+    </nav>
+  </div>
+
+  <div class="container pb-xxl">
+    <div class="max-content-text">
+      <div class="badge badge-accent mb-sm">Get in Touch</div>
+      <h1 class="display-sm mb-sm">Contact the PayDecode Team</h1>
+      <p class="body-md text-muted mb-xl">
+        Have a question about our calculations, want to report a statutory rule change, or share feedback? We'd love to hear from you.
+      </p>
+
+      <div class="contact-grid">
+        <!-- Contact Form -->
+        <div class="card p-xl">
+          <form id="contact-form" onsubmit="event.preventDefault(); document.getElementById('contact-success').style.display='block';">
+            <div class="input-group">
+              <label for="contact-name" class="input-label">Your Name</label>
+              <input type="text" id="contact-name" class="input" required placeholder="e.g. Rahul Sharma" />
+            </div>
+
+            <div class="input-group">
+              <label for="contact-email" class="input-label">Email Address</label>
+              <input type="email" id="contact-email" class="input" required placeholder="e.g. rahul@example.com" />
+            </div>
+
+            <div class="input-group">
+              <label for="contact-topic" class="input-label">Subject / Topic</label>
+              <select id="contact-topic" class="input">
+                <option value="correction">Statutory Rule / Tax Correction</option>
+                <option value="feature">Feature or Calculator Request</option>
+                <option value="feedback">General User Feedback</option>
+                <option value="partnership">Business & Advertising Inquiries</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="contact-message" class="input-label">Message</label>
+              <textarea id="contact-message" class="input" rows="5" required placeholder="Describe your inquiry, suggestion, or calculation observation..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block mt-md">
+              Send Message
+            </button>
+
+            <div id="contact-success" class="alert alert-success mt-md" style="display: none;">
+              Thank you! Your message has been received. We review statutory feedback promptly.
+            </div>
+          </form>
+        </div>
+
+        <!-- Info Sidebar -->
+        <div class="contact-info">
+          <div class="card p-lg mb-md">
+            <h3 class="title-sm mb-xs">Statutory Accuracy Verification</h3>
+            <p class="body-sm text-muted mb-sm">
+              If you identify a new Gazette notification, High Court ruling, or EPFO circular that modifies salary deduction rules, please email our legal editorial desk:
+            </p>
+            <p class="font-mono text-primary font-bold">editorial@paydecode.in</p>
+          </div>
+
+          <div class="card p-lg">
+            <h3 class="title-sm mb-xs">Response Times</h3>
+            <p class="body-sm text-muted mb-xs">
+              We strive to respond to all technical and editorial inquiries within 24 to 48 business hours.
+            </p>
+            <p class="caption text-muted">
+              Note: We cannot provide individualized Chartered Accountant or tax-filing services.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .max-content-text {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 800px) {
+    .contact-grid {
+      grid-template-columns: 1.4fr 1fr;
+    }
+  }
+
+  .alert-success {
+    background: rgba(5, 177, 105, 0.1);
+    color: #05b169;
+    border: 1px solid rgba(5, 177, 105, 0.3);
+    padding: var(--space-md);
+    border-radius: var(--rounded-md);
+    font-size: 14px;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .font-bold {
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,741 @@
+---
+/**
+ * Job Offer Comparison Calculator
+ * Compares Offer A vs Offer B side-by-side with independent payroll structures,
+ * variable pay realizations, PF policies, and taxes.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Job Offer Comparison Calculator | Compare Two Salary Offers Side-by-Side';
+const description = 'Compare two job offers with different CTC structures, variable pay, PF policies, and bonuses. See which company actually pays more monthly in-hand bank credit.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/offer-comparison-calculator`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: 'Offer Comparison Calculator', item: `${site.url}/offer-comparison-calculator` },
+  ],
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Why does an offer with higher CTC sometimes pay less monthly in-hand salary?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Companies frequently inflate CTC with high non-cash components such as large variable pay targets (which are conditional), employer PF on full basic, high gratuity provisions, and multi-year retention bonuses. An offer with lower headline CTC but higher fixed cash salary often yields higher monthly bank credit.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How should I compare two job offers in India?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Never compare headline CTC alone. Compare 1) Monthly in-hand bank credit, 2) Guaranteed fixed annual cash, 3) Realizable variable bonus, and 4) Work location cost of living and professional tax.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/offer-comparison-calculator"
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Offer Comparison Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="text-center mb-xl">
+      <div class="badge badge-accent mb-sm">Offer Decoder Suite</div>
+      <h1 class="display-sm mb-xs">Compare Two Job Offers</h1>
+      <p class="body-md text-muted max-text-600">
+        Two offers with the same headline CTC can result in drastically different monthly take-home pay. Enter each offer's structure below for an independent head-to-head breakdown.
+      </p>
+    </div>
+
+    <!-- ═══ Unified Single-Line Live Comparison Scoreboard ═══ -->
+    <div class="card-scoreboard mb-xl" id="winner-card">
+      <div class="scoreboard-row">
+        <!-- Offer A Column -->
+        <div class="scoreboard-col scoreboard-col-a">
+          <div class="scoreboard-badge-a">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#60a5fa;"></span>
+            <span id="scoreboard-label-a">Current Company / Offer A</span>
+          </div>
+          <div class="scoreboard-val" id="scoreboard-inhand-a">₹1,13,288</div>
+          <div class="scoreboard-sub">Monthly Take-Home</div>
+          <div class="scoreboard-ctc" id="scoreboard-ctc-a">CTC: ₹18,00,000</div>
+        </div>
+
+        <!-- VS / Winner Center Column -->
+        <div class="scoreboard-vs">
+          <div class="vs-pill">VS</div>
+          <div>
+            <span class="scoreboard-delta-badge" id="winner-delta-badge">+₹19,073 / mo</span>
+          </div>
+          <div class="scoreboard-delta-winner" id="winner-tag">Offer A Leads</div>
+        </div>
+
+        <!-- Offer B Column -->
+        <div class="scoreboard-col scoreboard-col-b">
+          <div class="scoreboard-badge-b">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#34d399;"></span>
+            <span id="scoreboard-label-b">New Offer / Company B</span>
+          </div>
+          <div class="scoreboard-val" id="scoreboard-inhand-b">₹94,215</div>
+          <div class="scoreboard-sub">Monthly Take-Home</div>
+          <div class="scoreboard-ctc" id="scoreboard-ctc-b">CTC: ₹20,00,000</div>
+        </div>
+      </div>
+
+      <div class="text-center mt-md" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+        <span class="caption text-on-dark-soft" id="winner-sub">
+          Offer A yields ₹19,073 more monthly cash into your bank account.
+        </span>
+        <span id="winner-text" class="sr-only">Offer A yields more cash</span>
+      </div>
+    </div>
+
+    <!-- ═══ Unified Single-Line Comparative Matrix ═══ -->
+    <div class="card mb-xl">
+      <div class="flex items-center justify-between mb-md">
+        <div>
+          <h2 class="title-sm">Side-by-Side Compensation Structure</h2>
+          <p class="caption text-muted mt-xxs">Compare Offer A and Offer B on the exact same line. Live calculations update instantly.</p>
+        </div>
+        <div class="badge badge-accent">Interactive Matrix</div>
+      </div>
+
+      <div class="comp-matrix-container">
+        <table class="comp-matrix">
+          <thead>
+            <tr>
+              <th class="comp-matrix-param">Payroll Parameter</th>
+              <th class="comp-matrix-col-a">
+                <div class="offer-header-input">
+                  <span class="offer-badge badge-blue">Offer A</span>
+                  <input
+                    type="text"
+                    id="offer-a-name"
+                    class="input input-bare title-sm"
+                    value="Current Company / Offer A"
+                    placeholder="Company A Name"
+                  />
+                </div>
+              </th>
+              <th class="comp-matrix-col-b">
+                <div class="offer-header-input">
+                  <span class="offer-badge badge-green">Offer B</span>
+                  <input
+                    type="text"
+                    id="offer-b-name"
+                    class="input input-bare title-sm"
+                    value="New Offer / Company B"
+                    placeholder="Company B Name"
+                  />
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Row 1: Headline CTC -->
+            <tr>
+              <td class="comp-matrix-param">
+                Annual Headline CTC
+                <span class="param-hint">Total annual cost to company (₹)</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <div class="input-with-prefix">
+                  <span class="input-prefix">₹</span>
+                  <input type="text" id="offer-a-ctc" class="input input-number" value="1800000" />
+                </div>
+              </td>
+              <td class="comp-matrix-col-b">
+                <div class="input-with-prefix">
+                  <span class="input-prefix">₹</span>
+                  <input type="text" id="offer-b-ctc" class="input input-number" value="2000000" />
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 2: Basic Ratio -->
+            <tr>
+              <td class="comp-matrix-param">
+                Basic Salary Ratio
+                <span class="param-hint">Determines PF & Gratuity allocation</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <select id="offer-a-basic-pct" class="input">
+                  <option value="40" selected>40% of CTC</option>
+                  <option value="50">50% of CTC</option>
+                </select>
+              </td>
+              <td class="comp-matrix-col-b">
+                <select id="offer-b-basic-pct" class="input">
+                  <option value="40">40% of CTC</option>
+                  <option value="50" selected>50% of CTC</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 3: Target Variable -->
+            <tr>
+              <td class="comp-matrix-param">
+                Target Variable Bonus
+                <span class="param-hint">Annual performance bonus portion (₹)</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <div class="input-with-prefix">
+                  <span class="input-prefix">₹</span>
+                  <input type="text" id="offer-a-variable" class="input input-number" value="200000" placeholder="0" />
+                </div>
+              </td>
+              <td class="comp-matrix-col-b">
+                <div class="input-with-prefix">
+                  <span class="input-prefix">₹</span>
+                  <input type="text" id="offer-b-variable" class="input input-number" value="450000" placeholder="0" />
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 4: Payout % -->
+            <tr>
+              <td class="comp-matrix-param">
+                Expected Bonus Realization
+                <span class="param-hint">Conservative payout realization</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <div class="comp-input-wrap">
+                  <input type="number" id="offer-a-payout" class="input" value="90" min="0" max="100" />
+                  <span style="margin-left: 8px; font-weight:600; color:var(--color-muted);">%</span>
+                </div>
+              </td>
+              <td class="comp-matrix-col-b">
+                <div class="comp-input-wrap">
+                  <input type="number" id="offer-b-payout" class="input" value="70" min="0" max="100" />
+                  <span style="margin-left: 8px; font-weight:600; color:var(--color-muted);">%</span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 5: PF Policy -->
+            <tr>
+              <td class="comp-matrix-param">
+                PF Deduction Policy
+                <span class="param-hint">Statutory ₹25k cap vs Full Basic 12%</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <select id="offer-a-pf" class="input">
+                  <option value="statutory_ceiling" selected>Statutory Ceiling (₹25,000/mo)</option>
+                  <option value="full_basic">Full Basic (12% of basic)</option>
+                </select>
+              </td>
+              <td class="comp-matrix-col-b">
+                <select id="offer-b-pf" class="input">
+                  <option value="statutory_ceiling">Statutory Ceiling (₹25,000/mo)</option>
+                  <option value="full_basic" selected>Full Basic (12% of basic)</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 6: Tax Regime -->
+            <tr>
+              <td class="comp-matrix-param">
+                Income Tax Regime
+                <span class="param-hint">Income-tax Act, 2025</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <select id="offer-a-regime" class="input">
+                  <option value="new" selected>New Regime 2026–27</option>
+                  <option value="old">Old Regime</option>
+                </select>
+              </td>
+              <td class="comp-matrix-col-b">
+                <select id="offer-b-regime" class="input">
+                  <option value="new" selected>New Regime 2026–27</option>
+                  <option value="old">Old Regime</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 7: Highlight Row - Monthly In-Hand -->
+            <tr style="background: rgba(0, 82, 255, 0.05); font-weight: 700;">
+              <td class="comp-matrix-param" style="color: var(--color-ink);">
+                ⚡ Estimated Monthly In-Hand
+                <span class="param-hint">Estimated net cash credited to bank</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <span class="number-large" style="color: #0052ff;" id="offer-a-res-inhand">₹1,13,288</span>
+              </td>
+              <td class="comp-matrix-col-b">
+                <span class="number-large" style="color: #05b169;" id="offer-b-res-inhand">₹94,215</span>
+              </td>
+            </tr>
+
+            <!-- Row 8: Fixed Cash -->
+            <tr>
+              <td class="comp-matrix-param">
+                Guaranteed Fixed Cash (Annual)
+                <span class="param-hint">Annual take-home excluding variable</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <span class="number-display" id="offer-a-res-fixed">₹14,94,000</span>
+              </td>
+              <td class="comp-matrix-col-b">
+                <span class="number-display" id="offer-b-res-fixed">₹13,82,000</span>
+              </td>
+            </tr>
+
+            <!-- Row 9: Annual Income Tax -->
+            <tr>
+              <td class="comp-matrix-param">
+                Annual Income Tax (TDS)
+                <span class="param-hint">Estimated income tax withholding</span>
+              </td>
+              <td class="comp-matrix-col-a">
+                <span class="number-display text-down" id="offer-a-res-tax">₹1,62,400</span>
+              </td>
+              <td class="comp-matrix-col-b">
+                <span class="number-display text-down" id="offer-b-res-tax">₹1,48,200</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ Detailed Head-to-Head Table ═══ -->
+    <div class="card mt-xl">
+      <h2 class="title-sm mb-md">Detailed Head-to-Head Metrics</h2>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th class="text-right" id="th-name-a">Offer A</th>
+              <th class="text-right" id="th-name-b">Offer B</th>
+              <th class="text-right">Net Advantage</th>
+            </tr>
+          </thead>
+          <tbody id="comparison-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Ad Slot: Compliant responsive ad banner -->
+    <div class="ad-container-outer mt-xl">
+      <div class="ad-label">Advertisement</div>
+      <div class="ad-slot ad-responsive" id="ad-slot-comp-1">
+        <div class="ad-placeholder">
+          <span>Job Search Engines & Tech Resume Review Services</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Visual Key Takeaway Cards (Anti-Text-Heavy Design) ═══ -->
+    <div class="takeaway-grid mt-xxl">
+      <div class="takeaway-card">
+        <div class="takeaway-icon">⚡</div>
+        <h3 class="takeaway-title">The Variable Pay Mirage</h3>
+        <p class="takeaway-desc">
+          A ₹24 LPA offer with ₹6 LPA variable often pays significantly <strong>less monthly in-hand</strong> than a ₹20 LPA 100% fixed offer. Guaranteed cash always wins for monthly EMIs and SIP investments.
+        </p>
+      </div>
+
+      <div class="takeaway-card">
+        <div class="takeaway-icon">🏛️</div>
+        <h3 class="takeaway-title">PF Ceiling Impact (Sep 2026)</h3>
+        <p class="takeaway-desc">
+          Under EPFO's updated ₹25,000/mo statutory wage ceiling, employee PF is capped at ₹3,000/mo. If an employer mandates PF on full basic salary, deductions can jump to ₹9,600/mo, cutting your immediate take-home.
+        </p>
+      </div>
+
+      <div class="takeaway-card">
+        <div class="takeaway-icon">🛡️</div>
+        <h3 class="takeaway-title">Gratuity 5-Year Reality</h3>
+        <p class="takeaway-desc">
+          Companies lock ~4.81% of basic salary into CTC as gratuity. Under the Payment of Gratuity Act, you forfeit this entirely if you leave before 5 continuous years of service.
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══ Collapsible Detailed Educational Guide (Preserves 100% SEO Keywords) ═══ -->
+    <details class="card mt-lg" style="padding: var(--space-lg); border: 1px dashed var(--color-hairline);">
+      <summary class="title-sm" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+        <span>📘 In-Depth Regulatory Guide: How to Evaluate Two Job Offers in India</span>
+        <span class="badge badge-accent">Read Full Analysis</span>
+      </summary>
+      <div class="mt-md pt-md border-top">
+        <p class="body-md text-body mb-md">
+          It is extremely common in corporate India for a candidate to accept an offer with a 20% higher CTC, only to discover on their first payday that their actual monthly bank credit is lower than their previous role!
+        </p>
+
+        <h3 class="title-md mb-xs">Key Components That Distort Headline CTC</h3>
+        <ul class="seo-list mb-md">
+          <li><strong>Variable Pay & Performance Bonuses:</strong> Some companies allocate 20% to 35% of CTC to variable bonuses. If team performance or company EBITDA targets are missed, your payout can drop to 60% or zero.</li>
+          <li><strong>PF Policy (Statutory Cap vs Full Basic):</strong> Under the EPFO rules updated 17 September 2026, the statutory wage ceiling is ₹25,000/mo (deducting ₹3,000 employee + ₹3,000 employer = ₹6,000/mo). If an employer mandates PF on full basic salary (e.g. ₹80,000/mo), ₹9,600 is deducted on both sides (total ₹19,200/mo), slashing your immediate monthly bank credit.</li>
+          <li><strong>Gratuity Provisions:</strong> Companies include ~4.81% of your basic salary in the CTC as a gratuity accrual. However, under the Payment of Gratuity Act, 1972, you only receive this money if you remain with the company for at least 5 continuous years.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ═══ Frequently Asked Questions ═══ -->
+    <div class="card mt-lg" style="padding: var(--space-lg);">
+      <h3 class="title-md mb-md">Frequently Asked Questions</h3>
+      <div class="faq-accordion">
+        <details class="faq-item" open>
+          <summary class="faq-question">Should I pick an offer with ₹20 LPA fixed or ₹24 LPA with ₹6 LPA variable?</summary>
+          <div class="faq-answer">
+            <p>In almost all cases, ₹20 LPA fixed is financially superior. ₹20 LPA guaranteed fixed cash gives steady, reliable monthly in-hand cash for EMIs and SIP investments. An offer with ₹18 LPA fixed + ₹6 LPA variable produces lower monthly bank credit and carries payout risk.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">How does employer NPS affect offer comparison?</summary>
+          <div class="faq-answer">
+            <p>Under Section 124 of the Income-tax Act, 2025, employer contributions to NPS up to 14% of basic are tax-exempt under the New Regime. If one company offers corporate NPS and the other does not, it can save thousands in income tax.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .offer-header-input {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .offer-badge {
+    padding: 3px 10px;
+    border-radius: var(--rounded-pill);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .badge-blue {
+    background: rgba(0, 82, 255, 0.12);
+    color: #0052ff;
+  }
+
+  .badge-green {
+    background: rgba(5, 177, 105, 0.12);
+    color: #05b169;
+  }
+
+  .input-bare {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    padding: 2px 4px;
+    width: 100%;
+  }
+
+  .input-bare:focus {
+    outline: none;
+    background: #ffffff;
+    border-radius: var(--rounded-sm);
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-text-600 {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    background: var(--color-canvas);
+  }
+
+  .faq-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-body);
+  }
+</style>
+
+<script>
+  import { calculateSalary } from '../utils/salaryEngine';
+  import { parseSalaryInput, formatINR } from '../utils/formatCurrency';
+  import type { PfPolicy } from '../config/statutoryRules';
+  import type { TaxRegime } from '../utils/taxEngine';
+
+  // Offer A Elements
+  const nameA = document.getElementById('offer-a-name') as HTMLInputElement;
+  const ctcA = document.getElementById('offer-a-ctc') as HTMLInputElement;
+  const basicPctA = document.getElementById('offer-a-basic-pct') as HTMLSelectElement;
+  const variableA = document.getElementById('offer-a-variable') as HTMLInputElement;
+  const payoutA = document.getElementById('offer-a-payout') as HTMLInputElement;
+  const pfA = document.getElementById('offer-a-pf') as HTMLSelectElement;
+  const regimeA = document.getElementById('offer-a-regime') as HTMLSelectElement;
+
+  // Offer B Elements
+  const nameB = document.getElementById('offer-b-name') as HTMLInputElement;
+  const ctcB = document.getElementById('offer-b-ctc') as HTMLInputElement;
+  const basicPctB = document.getElementById('offer-b-basic-pct') as HTMLSelectElement;
+  const variableB = document.getElementById('offer-b-variable') as HTMLInputElement;
+  const payoutB = document.getElementById('offer-b-payout') as HTMLInputElement;
+  const pfB = document.getElementById('offer-b-pf') as HTMLSelectElement;
+  const regimeB = document.getElementById('offer-b-regime') as HTMLSelectElement;
+
+  // Result Elements
+  const winnerCard = document.getElementById('winner-card')!;
+  const winnerTag = document.getElementById('winner-tag')!;
+  const winnerDeltaBadge = document.getElementById('winner-delta-badge')!;
+  const winnerText = document.getElementById('winner-text')!;
+  const winnerSub = document.getElementById('winner-sub')!;
+
+  const resInhandA = document.getElementById('offer-a-res-inhand')!;
+  const resFixedA = document.getElementById('offer-a-res-fixed')!;
+  const resTaxA = document.getElementById('offer-a-res-tax')!;
+
+  const resInhandB = document.getElementById('offer-b-res-inhand')!;
+  const resFixedB = document.getElementById('offer-b-res-fixed')!;
+  const resTaxB = document.getElementById('offer-b-res-tax')!;
+
+  const thNameA = document.getElementById('th-name-a')!;
+  const thNameB = document.getElementById('th-name-b')!;
+  const compTbody = document.getElementById('comparison-tbody')!;
+
+  function compareOffers() {
+    const valCtcA = parseSalaryInput(ctcA.value);
+    const valCtcB = parseSalaryInput(ctcB.value);
+    if (!valCtcA || !valCtcB) return;
+
+    const labelA = nameA.value.trim() || 'Offer A';
+    const labelB = nameB.value.trim() || 'Offer B';
+    thNameA.textContent = labelA;
+    thNameB.textContent = labelB;
+
+    const resA = calculateSalary({
+      annualCTC: valCtcA,
+      basicPercent: Number(basicPctA.value),
+      targetVariablePay: parseSalaryInput(variableA.value) || 0,
+      variablePayoutPercent: Number(payoutA.value) || 100,
+      pfPolicy: pfA.value as PfPolicy,
+      regime: regimeA.value as TaxRegime,
+    });
+
+    const resB = calculateSalary({
+      annualCTC: valCtcB,
+      basicPercent: Number(basicPctB.value),
+      targetVariablePay: parseSalaryInput(variableB.value) || 0,
+      variablePayoutPercent: Number(payoutB.value) || 100,
+      pfPolicy: pfB.value as PfPolicy,
+      regime: regimeB.value as TaxRegime,
+    });
+
+    // Update Mini Boxes & Scoreboard
+    resInhandA.textContent = formatINR(resA.monthlyInHand);
+    resFixedA.textContent = formatINR(resA.annualFixedCash);
+    resTaxA.textContent = formatINR(resA.tax.totalTax);
+
+    resInhandB.textContent = formatINR(resB.monthlyInHand);
+    resFixedB.textContent = formatINR(resB.annualFixedCash);
+    resTaxB.textContent = formatINR(resB.tax.totalTax);
+
+    // Update Single-Line Top Scoreboard
+    const scLabelA = document.getElementById('scoreboard-label-a');
+    const scInhandA = document.getElementById('scoreboard-inhand-a');
+    const scCtcA = document.getElementById('scoreboard-ctc-a');
+    const scLabelB = document.getElementById('scoreboard-label-b');
+    const scInhandB = document.getElementById('scoreboard-inhand-b');
+    const scCtcB = document.getElementById('scoreboard-ctc-b');
+
+    if (scLabelA) scLabelA.textContent = labelA;
+    if (scInhandA) scInhandA.textContent = formatINR(resA.monthlyInHand);
+    if (scCtcA) scCtcA.textContent = `CTC: ${formatINR(resA.annualCTC)}`;
+
+    if (scLabelB) scLabelB.textContent = labelB;
+    if (scInhandB) scInhandB.textContent = formatINR(resB.monthlyInHand);
+    if (scCtcB) scCtcB.textContent = `CTC: ${formatINR(resB.annualCTC)}`;
+
+    // Winner Calculation
+    const monthlyDelta = resA.monthlyInHand - resB.monthlyInHand;
+    const annualRealizedDelta = resA.totalAnnualRealized - resB.totalAnnualRealized;
+
+    if (Math.abs(monthlyDelta) < 100) {
+      winnerTag.textContent = 'Take-Home Pay is Equal';
+      winnerDeltaBadge.textContent = 'Tie';
+      winnerText.textContent = 'Both offers result in virtually identical monthly bank credit';
+      winnerSub.textContent = `Compare work-life balance, career growth, culture, and commute.`;
+    } else if (monthlyDelta > 0) {
+      winnerTag.textContent = `${labelA} Leads Monthly Take-Home`;
+      winnerDeltaBadge.textContent = `+${formatINR(monthlyDelta)} / mo`;
+      winnerText.textContent = `${labelA} yields ${formatINR(monthlyDelta)} more monthly take-home in your bank account`;
+      winnerSub.textContent = `Even with CTC differences, ${labelA} puts +${formatINR(resA.annualInHand - resB.annualInHand)} more net guaranteed cash into your pocket annually.`;
+    } else {
+      const absDelta = Math.abs(monthlyDelta);
+      winnerTag.textContent = `${labelB} Leads Monthly Take-Home`;
+      winnerDeltaBadge.textContent = `+${formatINR(absDelta)} / mo`;
+      winnerText.textContent = `${labelB} yields ${formatINR(absDelta)} more monthly take-home in your bank account`;
+      winnerSub.textContent = `${labelB} delivers +${formatINR(resB.annualInHand - resA.annualInHand)} more net cash into your pocket annually.`;
+    }
+
+    // Comparison Rows
+    const rows = [
+      {
+        metric: 'Headline Annual CTC',
+        valA: formatINR(resA.annualCTC),
+        valB: formatINR(resB.annualCTC),
+        adv: resA.annualCTC > resB.annualCTC ? `${labelA} (+${formatINR(resA.annualCTC - resB.annualCTC)})` : resB.annualCTC > resA.annualCTC ? `${labelB} (+${formatINR(resB.annualCTC - resA.annualCTC)})` : 'Equal',
+        highlight: false,
+      },
+      {
+        metric: 'Monthly In-Hand Bank Credit',
+        valA: formatINR(resA.monthlyInHand),
+        valB: formatINR(resB.monthlyInHand),
+        adv: monthlyDelta > 0 ? `${labelA} (+${formatINR(monthlyDelta)})` : monthlyDelta < 0 ? `${labelB} (+${formatINR(Math.abs(monthlyDelta))})` : 'Equal',
+        highlight: true,
+      },
+      {
+        metric: 'Guaranteed Fixed Annual Cash',
+        valA: formatINR(resA.annualFixedCash),
+        valB: formatINR(resB.annualFixedCash),
+        adv: resA.annualFixedCash > resB.annualFixedCash ? `${labelA} (+${formatINR(resA.annualFixedCash - resB.annualFixedCash)})` : `${labelB} (+${formatINR(resB.annualFixedCash - resA.annualFixedCash)})`,
+        highlight: false,
+      },
+      {
+        metric: 'Expected Realized Variable Bonus',
+        valA: formatINR(resA.expectedVariablePay),
+        valB: formatINR(resB.expectedVariablePay),
+        adv: resA.expectedVariablePay > resB.expectedVariablePay ? `${labelA}` : `${labelB}`,
+        highlight: false,
+      },
+      {
+        metric: 'Total Annual Realized Pay (In-Hand + Bonus)',
+        valA: formatINR(resA.totalAnnualRealized),
+        valB: formatINR(resB.totalAnnualRealized),
+        adv: annualRealizedDelta > 0 ? `${labelA} (+${formatINR(annualRealizedDelta)})` : `${labelB} (+${formatINR(Math.abs(annualRealizedDelta))})`,
+        highlight: false,
+      },
+      {
+        metric: 'Annual Income Tax (TDS)',
+        valA: formatINR(resA.tax.totalTax),
+        valB: formatINR(resB.tax.totalTax),
+        adv: resA.tax.totalTax < resB.tax.totalTax ? `${labelA} (Saves ${formatINR(resB.tax.totalTax - resA.tax.totalTax)})` : `${labelB} (Saves ${formatINR(resA.tax.totalTax - resB.tax.totalTax)})`,
+        highlight: false,
+      },
+      {
+        metric: 'Total Provident Fund (Employee + Employer)',
+        valA: formatINR(resA.employeePF + resA.employerPF.annualEmployerPF),
+        valB: formatINR(resB.employeePF + resB.employerPF.annualEmployerPF),
+        adv: '-',
+        highlight: false,
+      },
+    ];
+
+    compTbody.innerHTML = rows
+      .map(
+        (r) => `
+        <tr ${r.highlight ? 'style="font-weight:600; background:rgba(5, 177, 105, 0.06);"' : ''}>
+          <td>${r.metric}</td>
+          <td class="text-right">${r.valA}</td>
+          <td class="text-right">${r.valB}</td>
+          <td class="text-right ${r.highlight ? 'text-success' : ''}">${r.adv}</td>
+        </tr>
+      `
+      )
+      .join('');
+  }
+
+  // Listeners
+  [nameA, ctcA, basicPctA, variableA, payoutA, pfA, regimeA,
+   nameB, ctcB, basicPctB, variableB, payoutB, pfB, regimeB].forEach((el) => {
+    el.addEventListener('input', compareOffers);
+    el.addEventListener('change', compareOffers);
+  });
+
+  // Initial Run
+  compareOffers();
+</script>

@@ -1,0 +1,83 @@
+---
+/**
+ * Terms of Use
+ * Clear disclaimers: informational estimates only, not personal financial/tax advice.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Terms of Use & Legal Disclaimer';
+const description = 'PayDecode terms of service. Calculator figures are indicative simulations based on displayed assumptions and do not constitute professional tax advice.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/terms`,
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/terms"
+  jsonLd={jsonLd}
+>
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Terms of Use</span>
+    </nav>
+  </div>
+
+  <div class="container pb-xxl">
+    <div class="max-content-text">
+      <div class="badge badge-accent mb-sm">Legal Terms</div>
+      <h1 class="display-sm mb-sm">Terms of Use</h1>
+      <p class="body-sm text-muted mb-xl">Last Updated: 17 October 2026</p>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">1. Informational & Illustrative Use Only</h2>
+        <p class="body-md text-body mb-sm">
+          All calculations, estimates, comparisons, and simulations provided by {site.name} are for general educational and informational purposes only. They are based on statutory assumptions and government notifications effective as of the dates specified on each tool.
+        </p>
+        <p class="body-md text-body">
+          <strong>Nothing on this website constitutes personal chartered accountancy (CA), legal, payroll, or tax advisory services.</strong> Actual monthly bank credit and annual tax liabilities can vary based on individual employer compensation policies, variable bonuses, perquisites, investment timings, and company payroll systems.
+        </p>
+      </section>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">2. No Warranties & Limitation of Liability</h2>
+        <p class="body-md text-body mb-sm">
+          While we make every engineering effort to ensure calculation correctness and cite primary statutory sources (including the Income-tax Act, 2025 and EPFO notifications), {site.name} provides its tools on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis without warranties of any kind.
+        </p>
+        <p class="body-md text-body">
+          Users are advised to consult a qualified Chartered Accountant (CA) or tax professional before making significant career, investment, or tax filing decisions.
+        </p>
+      </section>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">3. Intellectual Property</h2>
+        <p class="body-md text-body mb-sm">
+          The software code, layout designs, calculation engines, and editorial guides on {site.name} are protected by copyright and intellectual property laws. You may not scrape, clone, or redistribute our tools without prior written permission.
+        </p>
+      </section>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">4. Governing Law</h2>
+        <p class="body-md text-body">
+          These Terms of Use shall be governed by and construed in accordance with the laws of the Republic of India.
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .max-content-text {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+</style>

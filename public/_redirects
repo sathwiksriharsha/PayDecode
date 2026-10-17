@@ -1,0 +1,8 @@
+# Cloudflare Pages 301 Redirects for Dot-in-Slug legacy and manual entries
+/salary/2.5-lpa-in-hand-salary    /salary/2-5-lpa-in-hand-salary    301
+/salary/3.5-lpa-in-hand-salary    /salary/3-5-lpa-in-hand-salary    301
+/salary/4.5-lpa-in-hand-salary    /salary/4-5-lpa-in-hand-salary    301
+/salary/5.5-lpa-in-hand-salary    /salary/5-5-lpa-in-hand-salary    301
+/salary/6.5-lpa-in-hand-salary    /salary/6-5-lpa-in-hand-salary    301
+/salary/7.5-lpa-in-hand-salary    /salary/7-5-lpa-in-hand-salary    301
+/salary/8.5-lpa-in-hand-salary    /salary/8-5-lpa-in-hand-salary    301

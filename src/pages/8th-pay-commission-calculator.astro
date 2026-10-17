@@ -1,0 +1,529 @@
+---
+/**
+ * 8th Central Pay Commission (CPC) Salary Calculator (Hypothetical Scenario Simulator)
+ * Allows central government employees to simulate fitment factor scenarios (1.92x to 2.86x).
+ * Explicitly labelled as hypothetical with link to official Commission site (https://8cpc.gov.in/).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = '8th Pay Commission Salary Calculator | Expected Fitment Factor Simulator';
+const description = 'Simulate expected salary revisions under the 8th Central Pay Commission with hypothetical fitment factors (1.92x to 2.86x). Pure scenario tool linking official 8cpc.gov.in site.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/8th-pay-commission-calculator`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: '8th Pay Commission Calculator', item: `${site.url}/8th-pay-commission-calculator` },
+  ],
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Has the official 8th Pay Commission fitment factor been announced?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. As of October 2026, the Government of India has not notified an official fitment factor or pay matrix for the 8th Central Pay Commission. Any numbers (such as 1.92x, 2.57x, or 2.86x) are hypothetical proposals and simulation models. Track official updates directly at https://8cpc.gov.in/.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What was the fitment factor in the 7th Pay Commission?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'The 7th Central Pay Commission recommended a uniform fitment factor of 2.57, which was applied to the 6th CPC basic pay to arrive at the revised 7th CPC basic pay matrix.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the formula used in fitment factor simulations?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Simulated 8th CPC Basic Pay = Current 7th CPC Basic Pay × Fitment Factor (rounded to nearest ₹100 as per Pay Commission convention).',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/8th-pay-commission-calculator"
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>8th Pay Commission Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <!-- Notice Banner -->
+    <div class="alert alert-info mb-xl">
+      <span class="alert-icon">ℹ</span>
+      <div class="alert-content">
+        <strong>Hypothetical Simulation Tool:</strong> The 8th Central Pay Commission is currently active. Official fitment factors and pay matrices have NOT yet been notified by the Government of India. This simulator uses user-selected scenarios. Always verify with official announcements on <a href="https://8cpc.gov.in/" target="_blank" rel="noopener noreferrer" class="link-underline">8cpc.gov.in</a>.
+      </div>
+    </div>
+
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Input Panel ═══ -->
+      <div class="calc-inputs">
+        <div class="card">
+          <div class="badge badge-accent mb-sm">Scenario Simulator</div>
+          <h1 class="display-sm mb-xs">8th CPC Salary Calculator</h1>
+          <p class="body-sm text-muted mb-xl">
+            Simulate expected salary revisions across various fitment factor proposals.
+          </p>
+
+          <!-- Current Basic -->
+          <div class="input-group">
+            <label for="cpc-basic" class="input-label">Current 7th CPC Monthly Basic Pay</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input type="text" id="cpc-basic" class="input input-number" value="56100" placeholder="e.g. 56,100 (Level 10 entry)" />
+            </div>
+          </div>
+
+          <!-- Fitment Factor Scenario -->
+          <div class="input-group">
+            <label for="cpc-factor" class="input-label">
+              Hypothetical Fitment Factor
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">Common scenarios debated in employee federation memorandums: 1.92x, 2.20x, 2.57x (same as 7th CPC), and 2.86x.</span>
+              </span>
+            </label>
+            <select id="cpc-factor" class="input">
+              <option value="1.92">1.92x — Conservative Scenario</option>
+              <option value="2.20">2.20x — Moderate Scenario</option>
+              <option value="2.57" selected>2.57x — 7th CPC Benchmark Factor</option>
+              <option value="2.86">2.86x — Employee Federation Proposal</option>
+              <option value="custom">Custom Fitment Factor...</option>
+            </select>
+          </div>
+
+          <div class="input-group" id="custom-factor-group" style="display:none;">
+            <label for="cpc-custom-factor" class="input-label">Custom Fitment Factor</label>
+            <input type="number" id="cpc-custom-factor" class="input" value="2.50" step="0.01" min="1.0" max="4.0" />
+          </div>
+
+          <!-- HRA City Class -->
+          <div class="input-group">
+            <label class="input-label">HRA City Classification</label>
+            <div class="radio-group">
+              <label class="radio-pill">
+                <input type="radio" name="cpc-city" value="X" checked /> Class X (30%)
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="cpc-city" value="Y" /> Class Y (20%)
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="cpc-city" value="Z" /> Class Z (10%)
+              </label>
+            </div>
+            <p class="caption text-muted mt-xs">
+              Class X: 50L+ population metros. Class Y: 5L–50L cities. Class Z: Remaining towns.
+            </p>
+          </div>
+
+          <button id="calc-cpc-btn" class="btn btn-primary btn-block mt-md">
+            Simulate 8th CPC Revision
+          </button>
+        </div>
+
+        <!-- Ad Slot -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-cpc-1">
+            <div class="ad-placeholder">
+              <span>Government Pensioners Welfare & NPS Tier II Schemes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Right: Result Panel ═══ -->
+      <div class="calc-results">
+        <!-- Result Hero Card -->
+        <div class="card card-hero-result" id="cpc-hero-card">
+          <div class="hero-result-header">
+            <span class="hero-result-label">Revised Estimated Basic Pay</span>
+            <span class="badge badge-accent" id="factor-badge">2.57x Scenario</span>
+          </div>
+
+          <div class="hero-result-amount text-success" id="res-revised-basic">₹1,44,200</div>
+          <div class="hero-result-sub" id="res-basic-diff">Expected Basic Pay bump: +₹88,100 / month</div>
+
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">Estimated Gross Salary</span>
+              <span class="stat-val text-success" id="res-revised-gross">₹1,87,460</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly Increment</span>
+              <span class="stat-val text-success" id="res-monthly-diff">+₹65,200 / mo</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Estimated HRA</span>
+              <span class="stat-val" id="res-revised-hra">₹43,260</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Official Status</span>
+              <span class="stat-val text-on-dark-soft">Pending Gazette</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="card mt-lg">
+          <h2 class="title-sm mb-md">7th CPC vs Simulated 8th CPC Breakdown</h2>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Salary Component</th>
+                  <th class="text-right">7th CPC (Current)</th>
+                  <th class="text-right">8th CPC (Simulated)</th>
+                  <th class="text-right">Difference</th>
+                </tr>
+              </thead>
+              <tbody id="cpc-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Official Sources Box -->
+        <div class="card mt-lg bg-soft">
+          <h3 class="title-sm mb-xs">Official Authority Link</h3>
+          <p class="body-sm text-body mb-sm">
+            Please refer directly to the Ministry of Finance and the 8th Central Pay Commission for verified notifications:
+          </p>
+          <a href="https://8cpc.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+            Visit Official 8th CPC Portal (8cpc.gov.in) ↗
+          </a>
+        </div>
+
+        <!-- Ad Slot 2 -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-cpc-2">
+            <div class="ad-placeholder">
+              <span>Public Sector Bank Home Loan & Car Loan Interest Rates</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══ SEO Educational Article ═══ -->
+    <section class="seo-guide mt-xxl pt-xl border-top">
+      <div class="max-content-text">
+        <h2 class="display-sm mb-md">Understanding the 8th Central Pay Commission</h2>
+        <p class="body-md text-body mb-lg">
+          Central Pay Commissions are appointed by the Government of India periodically (approximately once every 10 years) to examine and recommend changes to the pay structure, allowances, and retirement benefits of Central Government employees and defense personnel.
+        </p>
+
+        <h3 class="title-lg mb-sm">Historical Fitment Factor Precedents</h3>
+        <ul class="seo-list mb-lg">
+          <li><strong>6th Pay Commission (2006):</strong> Introduced the Pay Band and Grade Pay system with a fitment factor of 1.86.</li>
+          <li><strong>7th Pay Commission (2016):</strong> Abolished Grade Pay, introduced the comprehensive 18-Level Pay Matrix, and applied a uniform fitment factor of 2.57, raising minimum entry basic pay from ₹7,000 to ₹18,000 per month.</li>
+          <li><strong>8th Pay Commission (Hypothetical):</strong> Various staff side representatives and employee federations have submitted representations seeking a fitment factor ranging between 1.92 and 2.86.</li>
+        </ul>
+
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 460px 1fr;
+    }
+  }
+
+  .alert {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--rounded-md);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .alert-info {
+    background: rgba(0, 82, 255, 0.08);
+    border: 1px solid rgba(0, 82, 255, 0.2);
+    color: var(--color-ink);
+  }
+
+  .alert-icon {
+    font-size: 18px;
+    color: var(--color-primary);
+  }
+
+  .link-underline {
+    color: var(--color-primary);
+    text-decoration: underline;
+    font-weight: 600;
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .text-success { color: #05b169 !important; }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-content-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+</style>
+
+<script>
+  import { parseSalaryInput, formatINR } from '../utils/formatCurrency';
+
+  const basicInput = document.getElementById('cpc-basic') as HTMLInputElement;
+  const factorSelect = document.getElementById('cpc-factor') as HTMLSelectElement;
+  const customGroup = document.getElementById('custom-factor-group')!;
+  const customFactorInput = document.getElementById('cpc-custom-factor') as HTMLInputElement;
+  const calcBtn = document.getElementById('calc-cpc-btn') as HTMLButtonElement;
+
+  // Outputs
+  const factorBadge = document.getElementById('factor-badge')!;
+  const resRevisedBasic = document.getElementById('res-revised-basic')!;
+  const resBasicDiff = document.getElementById('res-basic-diff')!;
+  const resRevisedGross = document.getElementById('res-revised-gross')!;
+  const resMonthlyDiff = document.getElementById('res-monthly-diff')!;
+  const resRevisedHra = document.getElementById('res-revised-hra')!;
+  const cpcTableBody = document.getElementById('cpc-table-body')!;
+
+  function getFitmentFactor(): number {
+    if (factorSelect.value === 'custom') {
+      return Number(customFactorInput.value) || 2.5;
+    }
+    return Number(factorSelect.value) || 2.57;
+  }
+
+  function getCityHraRate(): number {
+    const checked = (document.querySelector('input[name="cpc-city"]:checked') as HTMLInputElement)?.value;
+    if (checked === 'X') return 0.30;
+    if (checked === 'Y') return 0.20;
+    return 0.10;
+  }
+
+  function runCpcCalc() {
+    const currentBasic = parseSalaryInput(basicInput.value) || 0;
+    const factor = getFitmentFactor();
+    const hraRate = getCityHraRate();
+
+    // 7th CPC Breakdown (Assuming 50% DA currently merged or paid)
+    const currentDA = Math.round(currentBasic * 0.50);
+    const currentHRA = Math.round(currentBasic * hraRate);
+    const currentGross = currentBasic + currentDA + currentHRA;
+
+    // 8th CPC Revision: Basic = Current Basic * Factor (rounded to nearest 100)
+    const revisedBasic = Math.round((currentBasic * factor) / 100) * 100;
+    // Upon revision, DA restarts at 0%
+    const revisedDA = 0;
+    const revisedHRA = Math.round(revisedBasic * hraRate);
+    const revisedGross = revisedBasic + revisedDA + revisedHRA;
+
+    const basicDiff = revisedBasic - currentBasic;
+    const grossDiff = revisedGross - currentGross;
+
+    factorBadge.textContent = `${factor}x Scenario`;
+    resRevisedBasic.textContent = formatINR(revisedBasic);
+    resBasicDiff.textContent = `Basic Pay increase: +${formatINR(basicDiff)} / month`;
+    resRevisedGross.textContent = formatINR(revisedGross);
+    resMonthlyDiff.textContent = `${grossDiff >= 0 ? '+' : ''}${formatINR(grossDiff)} / mo`;
+    resRevisedHra.textContent = formatINR(revisedHRA);
+
+    const rows = [
+      {
+        name: 'Basic Pay',
+        c7: formatINR(currentBasic),
+        c8: formatINR(revisedBasic),
+        diff: `+${formatINR(basicDiff)}`,
+        highlight: true,
+      },
+      {
+        name: 'Dearness Allowance (DA)',
+        c7: `${formatINR(currentDA)} (50%)`,
+        c8: `${formatINR(revisedDA)} (0% reset)`,
+        diff: `-${formatINR(currentDA)}`,
+        highlight: false,
+      },
+      {
+        name: 'House Rent Allowance (HRA)',
+        c7: formatINR(currentHRA),
+        c8: formatINR(revisedHRA),
+        diff: `+${formatINR(revisedHRA - currentHRA)}`,
+        highlight: false,
+      },
+      {
+        name: 'Estimated Monthly Gross Salary',
+        c7: formatINR(currentGross),
+        c8: formatINR(revisedGross),
+        diff: `${grossDiff >= 0 ? '+' : ''}${formatINR(grossDiff)}`,
+        highlight: true,
+      },
+    ];
+
+    cpcTableBody.innerHTML = rows
+      .map(
+        (r) => `
+        <tr ${r.highlight ? 'style="font-weight:600; background:rgba(5, 177, 105, 0.06);"' : ''}>
+          <td>${r.name}</td>
+          <td class="text-right font-mono">${r.c7}</td>
+          <td class="text-right font-mono">${r.c8}</td>
+          <td class="text-right ${r.highlight ? 'text-success' : ''}">${r.diff}</td>
+        </tr>
+      `
+      )
+      .join('');
+  }
+
+  factorSelect.addEventListener('change', () => {
+    if (factorSelect.value === 'custom') {
+      customGroup.style.display = 'block';
+    } else {
+      customGroup.style.display = 'none';
+    }
+    runCpcCalc();
+  });
+
+  basicInput.addEventListener('input', runCpcCalc);
+  customFactorInput.addEventListener('input', runCpcCalc);
+  document.querySelectorAll('input[name="cpc-city"]').forEach((el) => el.addEventListener('change', runCpcCalc));
+  calcBtn.addEventListener('click', runCpcCalc);
+
+  // Initial Run
+  runCpcCalc();
+</script>

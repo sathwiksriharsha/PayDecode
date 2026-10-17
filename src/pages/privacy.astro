@@ -1,0 +1,104 @@
+---
+/**
+ * Privacy Policy
+ * Explicit disclosures: 100% client-side calculations, zero salary data uploads,
+ * cookies, Google AdSense, and analytics disclosures.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Privacy Policy — Privacy by Design';
+const description = 'PayDecode privacy policy. All salary calculations occur locally in your browser. We never collect, upload, or store your salary or offer details.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/privacy`,
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/privacy"
+  jsonLd={jsonLd}
+>
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Privacy Policy</span>
+    </nav>
+  </div>
+
+  <div class="container pb-xxl">
+    <div class="max-content-text">
+      <div class="badge badge-accent mb-sm">Privacy by Design</div>
+      <h1 class="display-sm mb-sm">Privacy Policy</h1>
+      <p class="body-sm text-muted mb-xl">Last Updated: 17 October 2026</p>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">1. Zero Financial Data Collection</h2>
+        <p class="body-md text-body mb-sm">
+          At {site.name}, your privacy is an absolute engineering principle. <strong>We do not collect, transmit, store, or log any salary numbers, offer letters, employer names, or deduction figures you enter into our tools.</strong>
+        </p>
+        <p class="body-md text-body">
+          All financial algorithms run entirely within your web browser using pure client-side JavaScript. Your financial inputs never leave your device.
+        </p>
+      </section>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">2. Cookies and Web Beacons</h2>
+        <p class="body-md text-body mb-sm">
+          Like most web applications, {site.name} may use standard cookies to improve user experience, remember basic interface preferences, and analyze anonymized aggregate traffic metrics (e.g., page views).
+        </p>
+      </section>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">3. Google AdSense & Third-Party Advertising</h2>
+        <p class="body-md text-body mb-sm">
+          We may display advertisements served by Google AdSense and its certified advertising partners to support the free operation of this service.
+        </p>
+        <ul class="seo-list mb-sm">
+          <li>Google, as a third-party vendor, uses cookies to serve ads on our site.</li>
+          <li>Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visits to our site and/or other sites on the Internet.</li>
+          <li>Users may opt out of personalized advertising by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" class="link-underline">Google Ads Settings</a>.</li>
+        </ul>
+      </section>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">4. Analytics</h2>
+        <p class="body-md text-body mb-sm">
+          We may employ privacy-focused analytics to monitor page performance, response latency, and technical reliability. No personal identifiable information (PII) or financial inputs are included in analytics events.
+        </p>
+      </section>
+
+      <section class="mb-lg">
+        <h2 class="title-md mb-xs">5. Contact Us</h2>
+        <p class="body-md text-body">
+          If you have questions regarding this Privacy Policy, please contact our privacy compliance team via our <a href="/contact" class="link-underline">Contact Page</a>.
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .max-content-text {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+
+  .link-underline {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+</style>

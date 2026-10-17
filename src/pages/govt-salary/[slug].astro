@@ -1,0 +1,836 @@
+---
+/**
+ * Government Pay Estimator Pages: /govt-salary/[slug]
+ * 6 government pay estimators (3 verified 7th CPC levels and 3 hypothetical 8th CPC scenario models).
+ * Clearly distinguishes official gazetted facts from editable assumptions and hypothetical scenarios.
+ * Includes direct link to official commission portal: https://8cpc.gov.in/
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { site } from '../../config/site';
+import { formatINR } from '../../utils/formatCurrency';
+
+interface GovtPayTrack {
+  slug: string;
+  is8thCPCScenario: boolean;
+  cpcTitle: string;
+  levelTitle: string;
+  cpcLevel: number;
+  entryBasic: number;
+  targetDesignations: string;
+  sourceDoc: string;
+  sourceUrl: string;
+  summary: string;
+  // 7th CPC data
+  seventhCpcData?: {
+    daPercent: number;
+    monthlyDA: number;
+    hraX: number; // 30%
+    hraY: number; // 20%
+    hraZ: number; // 10%
+    taHigher: number;
+    taOther: number;
+    npsDeduction: number; // 10% of Basic + DA
+    cgegis: number;
+    cghs: number;
+  };
+  // 8th CPC scenario models
+  eighthCpcScenarios?: {
+    factor: number;
+    label: string;
+    description: string;
+    revisedBasic: number;
+    initialDA: number;
+    projectedHraX: number;
+    projectedNps: number;
+    projectedInHandX: number;
+  }[];
+  faqs: { q: string; a: string }[];
+}
+
+export const GOVT_PAY_TRACKS: GovtPayTrack[] = [
+  // ─── 7th CPC Verified Pay Scales ───
+  {
+    slug: '7th-cpc-pay-level-1',
+    is8thCPCScenario: false,
+    cpcTitle: '7th Central Pay Commission',
+    levelTitle: 'Pay Level 1 (Entry Basic ₹18,000)',
+    cpcLevel: 1,
+    entryBasic: 18000,
+    targetDesignations: 'Multi-Tasking Staff (MTS), Group D, Peon, Track Maintainer, Helper, Daftary',
+    sourceDoc: 'Gazette of India Notification No. 1-2/2016-IC (Ministry of Finance)',
+    sourceUrl: 'https://doe.gov.in/7th-cpc-report',
+    summary: 'Pay Level 1 is the entry-level salary tier for central government employees under the 7th CPC Pay Matrix (Index 1.00, Cell 1).',
+    seventhCpcData: {
+      daPercent: 53,
+      monthlyDA: 9540,
+      hraX: 5400, // 30% or minimum ₹5,400
+      hraY: 3600, // 20% or minimum ₹3,600
+      hraZ: 1800, // 10% or minimum ₹1,800
+      taHigher: 2066, // 1,350 + 53% DA on TA
+      taOther: 1377,  // 900 + 53% DA on TA
+      npsDeduction: 2754, // 10% of (18,000 + 9,540)
+      cgegis: 30,
+      cghs: 250,
+    },
+    faqs: [
+      {
+        q: 'What is the in-hand salary for 7th CPC Level 1 in Delhi or Mumbai (X City)?',
+        a: 'In a Class X city (like Delhi, Mumbai, Bengaluru), gross salary is approx ₹35,006. After mandatory NPS (₹2,754), CGHS (₹250), and CGEGIS (₹30), the monthly in-hand bank credit is approximately ₹31,972.',
+      },
+      {
+        q: 'What is the current DA rate for central government employees?',
+        a: 'The Dearness Allowance (DA) stands at 53% of basic pay as notified by the Department of Expenditure (effective July/October 2026 cycle).',
+      },
+    ],
+  },
+  {
+    slug: '7th-cpc-pay-level-7',
+    is8thCPCScenario: false,
+    cpcTitle: '7th Central Pay Commission',
+    levelTitle: 'Pay Level 7 (Entry Basic ₹44,900)',
+    cpcLevel: 7,
+    entryBasic: 44900,
+    targetDesignations: 'Inspector of Central Excise/GST, Income Tax Inspector (ITI), Assistant Section Officer (ASO in CSS/MEA), CBI Sub-Inspector',
+    sourceDoc: '7th CPC Report, Vol. I & Department of Expenditure Order No. 1-2/2016-IC',
+    sourceUrl: 'https://doe.gov.in/7th-cpc-report',
+    summary: 'Pay Level 7 is the primary executive/inspector grade recruitment tier conducted via SSC CGL for premier ministries and revenue departments.',
+    seventhCpcData: {
+      daPercent: 53,
+      monthlyDA: 23797,
+      hraX: 13470, // 30% of 44,900
+      hraY: 8980,  // 20%
+      hraZ: 4490,  // 10%
+      taHigher: 5508, // 3,600 + 53% DA on TA
+      taOther: 2754,
+      npsDeduction: 6870, // 10% of (44,900 + 23,797)
+      cgegis: 60,
+      cghs: 650,
+    },
+    faqs: [
+      {
+        q: 'What is the monthly take-home salary for an ASO or Income Tax Inspector?',
+        a: 'In a Class X city (e.g. New Delhi), gross monthly salary is ₹87,675. After NPS/UPS contribution (₹6,870), CGHS (₹650), CGEGIS (₹60), and estimated TDS under the New Tax Regime, net monthly bank credit is approximately ₹77,000 to ₹79,000.',
+      },
+    ],
+  },
+  {
+    slug: '7th-cpc-pay-level-10',
+    is8thCPCScenario: false,
+    cpcTitle: '7th Central Pay Commission',
+    levelTitle: 'Pay Level 10 (Entry Basic ₹56,100)',
+    cpcLevel: 10,
+    entryBasic: 56100,
+    targetDesignations: 'Group A Gazetted Officers, UPSC Civil Services (IAS/IPS/IRS/IFS Probationers), Assistant Commissioner, Sub-Divisional Magistrate (SDM), Scientist C',
+    sourceDoc: 'UPSC Civil Services Gazette Pay Rules & 7th CPC Level 10 Schedule',
+    sourceUrl: 'https://doe.gov.in/7th-cpc-report',
+    summary: 'Pay Level 10 is the prestigious entry-level pay scale for Group A Central Civil Services and All India Services recruited through UPSC CSE/ESE.',
+    seventhCpcData: {
+      daPercent: 53,
+      monthlyDA: 29733,
+      hraX: 16830, // 30% of 56,100
+      hraY: 11220, // 20%
+      hraZ: 5610,  // 10%
+      taHigher: 11016, // 7,200 + 53% DA on TA
+      taOther: 5508,
+      npsDeduction: 8583, // 10% of (56,100 + 29,733)
+      cgegis: 120,
+      cghs: 650,
+    },
+    faqs: [
+      {
+        q: 'What is the starting salary of an IAS officer or Assistant Commissioner?',
+        a: 'The starting basic pay is ₹56,100. In a metro posting (Class X), gross salary is ₹1,13,679 per month. Net monthly bank credit after mandatory NPS, tax TDS, and welfare deductions is approximately ₹95,000 to ₹98,000.',
+      },
+    ],
+  },
+
+  // ─── 8th CPC Hypothetical Fitment Scenarios ───
+  {
+    slug: '8th-cpc-fitment-scenario-level-1',
+    is8thCPCScenario: true,
+    cpcTitle: '8th Central Pay Commission',
+    levelTitle: 'Level 1 Fitment Scenario Simulator (Base ₹18,000)',
+    cpcLevel: 1,
+    entryBasic: 18000,
+    targetDesignations: 'Multi-Tasking Staff (MTS), Group D, Trackman',
+    sourceDoc: 'Simulation model based on Pay Commission conventions. Commission portal: 8cpc.gov.in',
+    sourceUrl: 'https://8cpc.gov.in/',
+    summary: 'Hypothetical scenario simulator for 8th CPC Pay Level 1. Evaluates potential fitment factors (1.92x, 2.57x, 2.86x) against the current 7th CPC baseline.',
+    eighthCpcScenarios: [
+      {
+        factor: 1.92,
+        label: 'Scenario A: 1.92x Conservative Fitment',
+        description: 'Assumes DA absorption (approx 53%) plus a modest ~25% real wage increase.',
+        revisedBasic: 34600,
+        initialDA: 0,
+        projectedHraX: 8304, // 24%
+        projectedNps: 3460,  // 10%
+        projectedInHandX: 38500,
+      },
+      {
+        factor: 2.57,
+        label: 'Scenario B: 2.57x 7th CPC Parity Fitment',
+        description: 'Replicates the exact fitment factor recommended by the 7th Central Pay Commission.',
+        revisedBasic: 46300,
+        initialDA: 0,
+        projectedHraX: 11112,
+        projectedNps: 4630,
+        projectedInHandX: 51200,
+      },
+      {
+        factor: 2.86,
+        label: 'Scenario C: 2.86x Staff Side NC-JCM Proposal',
+        description: 'Simulates the high-demand proposal presented by central government employee federations.',
+        revisedBasic: 51500,
+        initialDA: 0,
+        projectedHraX: 12360,
+        projectedNps: 5150,
+        projectedInHandX: 57000,
+      },
+    ],
+    faqs: [
+      {
+        q: 'Has the Government of India confirmed the 8th Pay Commission fitment factor?',
+        a: 'No. The Government has not notified any fitment factor, revised minimum pay, or pay matrix for the 8th CPC. All numbers on this page are simulation models based on historical precedents. Track official government notifications on 8cpc.gov.in.',
+      },
+      {
+        q: 'What is the formula used in 8th CPC fitment simulations?',
+        a: 'Simulated 8th CPC Basic Pay = Current 7th CPC Basic Pay × Fitment Factor (rounded to nearest ₹100 as per central pay commission convention).',
+      },
+    ],
+  },
+  {
+    slug: '8th-cpc-fitment-scenario-level-7',
+    is8thCPCScenario: true,
+    cpcTitle: '8th Central Pay Commission',
+    levelTitle: 'Level 7 Fitment Scenario Simulator (Base ₹44,900)',
+    cpcLevel: 7,
+    entryBasic: 44900,
+    targetDesignations: 'Inspector of Central Excise/GST, Income Tax Inspector, Assistant Section Officer (ASO)',
+    sourceDoc: 'Simulation model based on historical pay commission multipliers. Official portal: 8cpc.gov.in',
+    sourceUrl: 'https://8cpc.gov.in/',
+    summary: 'Hypothetical scenario simulator for 8th CPC Pay Level 7 executive and inspector posts comparing 1.92x, 2.57x, and 2.86x multipliers.',
+    eighthCpcScenarios: [
+      {
+        factor: 1.92,
+        label: 'Scenario A: 1.92x Conservative Fitment',
+        description: 'Assumes modest real wage hike with DA absorption at implementation.',
+        revisedBasic: 86200,
+        initialDA: 0,
+        projectedHraX: 20688,
+        projectedNps: 8620,
+        projectedInHandX: 91500,
+      },
+      {
+        factor: 2.57,
+        label: 'Scenario B: 2.57x 7th CPC Parity Fitment',
+        description: 'Matches the 7th CPC uniform fitment factor.',
+        revisedBasic: 115400,
+        initialDA: 0,
+        projectedHraX: 27696,
+        projectedNps: 11540,
+        projectedInHandX: 119800,
+      },
+      {
+        factor: 2.86,
+        label: 'Scenario C: 2.86x Employee Federation Demand',
+        description: 'Simulates the employee union demand scenario.',
+        revisedBasic: 128400,
+        initialDA: 0,
+        projectedHraX: 30816,
+        projectedNps: 12840,
+        projectedInHandX: 131500,
+      },
+    ],
+    faqs: [
+      {
+        q: 'What is the expected revised salary for Level 7 under the 8th Pay Commission?',
+        a: 'Depending on the eventual fitment factor, simulated revised basic pay ranges from ₹86,200 (at 1.92x) to ₹1,28,400 (at 2.86x), compared to the current 7th CPC basic of ₹44,900. These are unconfirmed scenarios.',
+      },
+    ],
+  },
+  {
+    slug: '8th-cpc-fitment-scenario-level-10',
+    is8thCPCScenario: true,
+    cpcTitle: '8th Central Pay Commission',
+    levelTitle: 'Level 10 Fitment Scenario Simulator (Base ₹56,100)',
+    cpcLevel: 10,
+    entryBasic: 56100,
+    targetDesignations: 'Group A Gazetted Officers, UPSC CSE Probationers, Assistant Commissioner, SDM',
+    sourceDoc: 'Simulation model based on historical pay commission multipliers. Official portal: 8cpc.gov.in',
+    sourceUrl: 'https://8cpc.gov.in/',
+    summary: 'Hypothetical scenario simulator for 8th CPC Pay Level 10 Group A officers comparing potential fitment factors and net take-home projections.',
+    eighthCpcScenarios: [
+      {
+        factor: 1.92,
+        label: 'Scenario A: 1.92x Conservative Fitment',
+        description: 'Assumes DA absorption with standard inflation adjustment.',
+        revisedBasic: 107700,
+        initialDA: 0,
+        projectedHraX: 25848,
+        projectedNps: 10770,
+        projectedInHandX: 112000,
+      },
+      {
+        factor: 2.57,
+        label: 'Scenario B: 2.57x 7th CPC Parity Fitment',
+        description: 'Replicates the 7th CPC multiplier.',
+        revisedBasic: 144200,
+        initialDA: 0,
+        projectedHraX: 34608,
+        projectedNps: 14420,
+        projectedInHandX: 145000,
+      },
+      {
+        factor: 2.86,
+        label: 'Scenario C: 2.86x Employee Federation Demand',
+        description: 'Simulates the employee union demand scenario.',
+        revisedBasic: 160400,
+        initialDA: 0,
+        projectedHraX: 38496,
+        projectedNps: 16040,
+        projectedInHandX: 159000,
+      },
+    ],
+    faqs: [
+      {
+        q: 'What is the projected 8th CPC basic pay for a Group A officer?',
+        a: 'Under hypothetical fitment models, a Level 10 officer with current basic of ₹56,100 could see revised basic between ₹1,07,700 (1.92x) and ₹1,60,400 (2.86x). Official announcements will be published on 8cpc.gov.in.',
+      },
+    ],
+  },
+];
+
+export async function getStaticPaths() {
+  return GOVT_PAY_TRACKS.map((track) => ({
+    params: { slug: track.slug },
+    props: { track },
+  }));
+}
+
+interface Props {
+  track: GovtPayTrack;
+}
+
+const { track } = Astro.props;
+
+const title = track.is8thCPCScenario
+  ? `8th Pay Commission ${track.levelTitle} | Expected Fitment Simulator | PayDecode`
+  : `${track.levelTitle} Salary Calculator | 7th CPC In-Hand Pay Breakdown | PayDecode`;
+
+const description = track.is8thCPCScenario
+  ? `Simulate hypothetical 8th Pay Commission revisions for ${track.levelTitle}. Compare 1.92x, 2.57x, and 2.86x fitment factor scenarios. Pure scenario tool linking official 8cpc.gov.in portal.`
+  : `Calculate monthly in-hand salary for 7th CPC ${track.levelTitle} (${track.targetDesignations}). Verified 53% DA, X/Y/Z city HRA, TA, and NPS deductions.`;
+
+const canonicalPath = `/govt-salary/${track.slug}`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: title,
+  description,
+  url: `${site.url}${canonicalPath}`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: track.faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="/8th-pay-commission-calculator">Government Pay</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>{track.levelTitle}</span>
+    </nav>
+  </div>
+
+  <div class="container">
+
+    <!-- ═══ Mandatory 8th CPC Scenario Disclosure Banner ═══ -->
+    {track.is8thCPCScenario && (
+      <div class="alert alert-warning mb-xl">
+        <span class="alert-icon">⚠️</span>
+        <div class="alert-content">
+          <strong>HYPOTHETICAL SIMULATION TOOL — NOT AN OFFICIAL GOVERNMENT ANNOUNCEMENT</strong>
+          <p class="body-sm mt-xxs mb-xs">
+            As of October 2026, the Government of India has <strong>NOT notified an official fitment factor, pay matrix, or implementation date</strong> for the 8th Central Pay Commission. The calculations below are speculative simulation models based on 1.92x, 2.57x, and 2.86x proposals.
+          </p>
+          <a href="https://8cpc.gov.in/" target="_blank" rel="noopener noreferrer" class="link-underline font-bold">
+            Track Official Government Notifications on 8cpc.gov.in →
+          </a>
+        </div>
+      </div>
+    )}
+
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Hero Summary Card ═══ -->
+      <div class="calc-inputs">
+        <div class="card card-hero-result">
+          <div class="hero-result-header">
+            <span class="hero-result-label">{track.cpcTitle}</span>
+            <span class={`badge ${track.is8thCPCScenario ? 'badge-accent' : 'badge-success'}`}>
+              {track.is8thCPCScenario ? 'Scenario Model' : 'Verified 7th CPC'}
+            </span>
+          </div>
+
+          {!track.is8thCPCScenario && track.seventhCpcData && (
+            <>
+              <div class="hero-result-amount text-success">
+                {formatINR(track.entryBasic + track.seventhCpcData.monthlyDA + track.seventhCpcData.hraX + track.seventhCpcData.taHigher - track.seventhCpcData.npsDeduction - track.seventhCpcData.cghs - track.seventhCpcData.cgegis)} / mo
+              </div>
+              <div class="hero-result-sub">
+                Estimated Net In-Hand Bank Credit (Class X Metro City)
+              </div>
+            </>
+          )}
+
+          {track.is8thCPCScenario && track.eighthCpcScenarios && (
+            <>
+              <div class="hero-result-amount text-success">
+                {formatINR(track.eighthCpcScenarios[1].projectedInHandX)} / mo
+              </div>
+              <div class="hero-result-sub">
+                Simulated Net Take-Home at 2.57x Parity Fitment (Class X City)
+              </div>
+            </>
+          )}
+
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">7th CPC Base Basic</span>
+              <span class="stat-val font-mono">{formatINR(track.entryBasic)}</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Applicable Posts</span>
+              <span class="stat-val font-mono" style="font-size:12px;">Level {track.cpcLevel} Cadre</span>
+            </div>
+            {!track.is8thCPCScenario && track.seventhCpcData && (
+              <>
+                <div class="hero-stat-box">
+                  <span class="stat-caption">Current DA Rate</span>
+                  <span class="stat-val font-mono text-success">53% of Basic</span>
+                </div>
+                <div class="hero-stat-box">
+                  <span class="stat-caption">Mandatory NPS / UPS</span>
+                  <span class="stat-val font-mono">{formatINR(track.seventhCpcData.npsDeduction)}</span>
+                </div>
+              </>
+            )}
+            {track.is8thCPCScenario && track.eighthCpcScenarios && (
+              <>
+                <div class="hero-stat-box">
+                  <span class="stat-caption">Modeled Factor</span>
+                  <span class="stat-val font-mono text-primary">1.92x – 2.86x</span>
+                </div>
+                <div class="hero-stat-box">
+                  <span class="stat-caption">Official Status</span>
+                  <span class="stat-val font-mono text-danger">Unconfirmed</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <!-- Target Roles & Official Source Card -->
+        <div class="card mt-lg">
+          <div class="badge badge-primary mb-xs">Cadre Information</div>
+          <h3 class="title-sm mb-xs">Roles & Designations</h3>
+          <p class="body-sm text-body mb-sm">
+            {track.targetDesignations}
+          </p>
+          <div class="p-sm bg-soft border rounded caption">
+            <p class="mb-xxs"><strong>Baseline Authority:</strong> {track.sourceDoc}</p>
+            <p class="mb-0"><strong>Official Government Source:</strong> <a href={track.sourceUrl} target="_blank" rel="noopener noreferrer" class="link-underline">{track.sourceUrl}</a></p>
+          </div>
+        </div>
+
+        <!-- Interactive Calculator Link -->
+        <div class="card mt-lg">
+          <h3 class="title-sm mb-xs">Compare with Corporate CTC?</h3>
+          <p class="body-sm text-muted mb-md">
+            Evaluate how this government take-home compares to private IT or consulting offer letters.
+          </p>
+          <a href="/ctc-to-inhand-calculator" class="btn btn-primary btn-block">
+            Open Interactive CTC Calculator →
+          </a>
+        </div>
+
+        <!-- Other Govt Scales Links -->
+        <div class="card mt-lg bg-soft">
+          <h3 class="title-sm mb-xs">Other Government Pay Tracks</h3>
+          <div class="company-links-list mt-sm">
+            {GOVT_PAY_TRACKS.filter((t) => t.slug !== track.slug).map((g) => (
+              <a href={`/govt-salary/${g.slug}`} class="company-sub-link">
+                <span>{g.levelTitle}</span>
+                <span class={`badge ${g.is8thCPCScenario ? 'badge-accent' : 'badge-neutral'}`}>
+                  {g.is8thCPCScenario ? '8th CPC' : '7th CPC'}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ Right: Pay Decomposition or Scenario Matrix ═══ -->
+      <div class="calc-results">
+
+        <!-- ── Case A: Verified 7th CPC Level ── -->
+        {!track.is8thCPCScenario && track.seventhCpcData && (
+          <div class="card">
+            <div class="badge badge-success mb-xs">Verified 7th CPC Matrix</div>
+            <h1 class="display-sm mb-xs">{track.levelTitle} Salary Breakdown</h1>
+            <p class="body-sm text-muted mb-xl">
+              Official monthly earnings, allowances, and statutory deductions for central government employees.
+            </p>
+
+            <h2 class="title-sm mb-sm">Monthly Earnings by City Classification (X, Y, Z)</h2>
+            <div class="table-container mb-lg">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Component</th>
+                    <th>Class X (Metros)</th>
+                    <th>Class Y (Tier-2)</th>
+                    <th>Class Z (Rural/Other)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Basic Pay (Level {track.cpcLevel}, Cell 1)</td>
+                    <td class="font-mono">{formatINR(track.entryBasic)}</td>
+                    <td class="font-mono">{formatINR(track.entryBasic)}</td>
+                    <td class="font-mono">{formatINR(track.entryBasic)}</td>
+                  </tr>
+                  <tr>
+                    <td>Dearness Allowance (DA @ 53%)</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.monthlyDA)}</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.monthlyDA)}</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.monthlyDA)}</td>
+                  </tr>
+                  <tr>
+                    <td>House Rent Allowance (HRA)</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.hraX)} (30%)</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.hraY)} (20%)</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.hraZ)} (10%)</td>
+                  </tr>
+                  <tr>
+                    <td>Transport Allowance (TA + DA on TA)</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.taHigher)}</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.taOther)}</td>
+                    <td class="font-mono">{formatINR(track.seventhCpcData.taOther)}</td>
+                  </tr>
+                  <tr style="font-weight:700; background:var(--color-surface-soft);">
+                    <td>Total Gross Monthly Salary</td>
+                    <td class="font-mono">{formatINR(track.entryBasic + track.seventhCpcData.monthlyDA + track.seventhCpcData.hraX + track.seventhCpcData.taHigher)}</td>
+                    <td class="font-mono">{formatINR(track.entryBasic + track.seventhCpcData.monthlyDA + track.seventhCpcData.hraY + track.seventhCpcData.taOther)}</td>
+                    <td class="font-mono">{formatINR(track.entryBasic + track.seventhCpcData.monthlyDA + track.seventhCpcData.hraZ + track.seventhCpcData.taOther)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h2 class="title-sm mb-sm">Mandatory Government Deductions</h2>
+            <div class="table-container mb-lg">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Deduction Item</th>
+                    <th>Statutory Rule</th>
+                    <th class="text-right">Monthly Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>National Pension System (NPS) / UPS</td>
+                    <td class="caption">10% of (Basic + DA)</td>
+                    <td class="text-right font-mono text-danger">{formatINR(track.seventhCpcData.npsDeduction)}</td>
+                  </tr>
+                  <tr>
+                    <td>Central Govt Health Scheme (CGHS)</td>
+                    <td class="caption">Standard Medical Contribution</td>
+                    <td class="text-right font-mono text-danger">{formatINR(track.seventhCpcData.cghs)}</td>
+                  </tr>
+                  <tr>
+                    <td>CGEGIS Insurance Scheme</td>
+                    <td class="caption">Group Insurance Scheme</td>
+                    <td class="text-right font-mono text-danger">{formatINR(track.seventhCpcData.cgegis)}</td>
+                  </tr>
+                  <tr style="font-weight:700; background:rgba(5, 177, 105, 0.08);">
+                    <td>Net In-Hand Bank Credit (Class X City)</td>
+                    <td><span class="badge badge-success">Bank Credit</span></td>
+                    <td class="text-right font-mono text-success">
+                      {formatINR(track.entryBasic + track.seventhCpcData.monthlyDA + track.seventhCpcData.hraX + track.seventhCpcData.taHigher - track.seventhCpcData.npsDeduction - track.seventhCpcData.cghs - track.seventhCpcData.cgegis)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <!-- ── Case B: Hypothetical 8th CPC Scenario Model ── -->
+        {track.is8thCPCScenario && track.eighthCpcScenarios && (
+          <div class="card">
+            <div class="badge badge-accent mb-xs">Hypothetical Simulation</div>
+            <h1 class="display-sm mb-xs">{track.levelTitle}</h1>
+            <p class="body-sm text-muted mb-xl">
+              Simulated projections based on current proposals and historical Central Pay Commission multiples.
+            </p>
+
+            <h2 class="title-sm mb-sm">Three-Scenario Fitment Comparison</h2>
+            <div class="table-container mb-lg">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Scenario Metric</th>
+                    {track.eighthCpcScenarios.map((s) => (
+                      <th>{s.label}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Modeled Fitment Factor</td>
+                    {track.eighthCpcScenarios.map((s) => (
+                      <td class="font-mono font-bold text-primary">{s.factor}x</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td><strong>Simulated Revised Basic Pay</strong></td>
+                    {track.eighthCpcScenarios.map((s) => (
+                      <td class="font-mono font-bold">{formatINR(s.revisedBasic)}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td>Initial Dearness Allowance (DA)</td>
+                    {track.eighthCpcScenarios.map(() => (
+                      <td class="caption">Reset to 0% at Implementation</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td>Projected HRA (Class X Metro @ 24%)</td>
+                    {track.eighthCpcScenarios.map((s) => (
+                      <td class="font-mono">{formatINR(s.projectedHraX)}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td>Projected NPS / UPS Deduction (10%)</td>
+                    {track.eighthCpcScenarios.map((s) => (
+                      <td class="font-mono text-danger">{formatINR(s.projectedNps)}</td>
+                    ))}
+                  </tr>
+                  <tr style="font-weight:700; background:rgba(5, 177, 105, 0.08);">
+                    <td><strong>Simulated Monthly Bank Credit</strong></td>
+                    {track.eighthCpcScenarios.map((s) => (
+                      <td class="font-mono text-success">{formatINR(s.projectedInHandX)}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="alert alert-info p-md mt-md">
+              <p class="body-sm" style="margin:0;">
+                <strong>Simulation Methodology:</strong> Revised Basic = 7th CPC Basic (₹{track.entryBasic.toLocaleString('en-IN')}) × Fitment Factor (rounded to nearest ₹100). When a new pay commission takes effect, DA is absorbed and reset to 0%. Actual allowances will depend on the final recommendations of the 8th CPC and Cabinet approval.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <!-- FAQs -->
+        <div class="card mt-lg">
+          <h2 class="title-md mb-sm">Frequently Asked Questions</h2>
+          <div class="faq-accordion mt-md">
+            {track.faqs.map((f, i) => (
+              <details class="faq-item" open={i === 0}>
+                <summary class="faq-question">{f.q}</summary>
+                <div class="faq-answer">
+                  <p>{f.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 440px 1fr;
+    }
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .alert {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--rounded-md);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .alert-warning {
+    background: #fff8e6;
+    border: 1px solid #ffd166;
+    color: #5c3d00;
+  }
+
+  .alert-info {
+    background: rgba(0, 82, 255, 0.08);
+    border: 1px solid rgba(0, 82, 255, 0.2);
+    color: var(--color-ink);
+  }
+
+  .alert-icon { font-size: 20px; }
+
+  .company-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .company-sub-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    font-size: 13px;
+    color: var(--color-body-strong);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .company-sub-link:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+  .text-primary { color: var(--color-primary) !important; }
+  .font-mono { font-family: var(--font-mono); }
+  .caption { font-size: 12px; color: var(--color-muted); }
+
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    background: var(--color-canvas);
+  }
+
+  .faq-question {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-body);
+  }
+</style>

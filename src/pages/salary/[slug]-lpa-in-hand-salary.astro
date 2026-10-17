@@ -1,0 +1,724 @@
+---
+/**
+ * Programmatic Salary Breakdown Page: /salary/[slug]-lpa-in-hand-salary
+ * Generates pre-rendered, rich editorial salary pages for popular LPA brackets.
+ * Includes three-scenario PF comparison (statutory capped vs full-basic vs historical).
+ * Fully compliant with Income-tax Act, 2025 (Tax Year 2026–27).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { site } from '../../config/site';
+import { calculateSalary } from '../../utils/salaryEngine';
+import { formatINR, numberToIndianWords } from '../../utils/formatCurrency';
+
+export async function getStaticPaths() {
+  const lpaValues = [
+    { lpa: 2.5, slug: '2-5' },
+    { lpa: 3, slug: '3' },
+    { lpa: 3.5, slug: '3-5' },
+    { lpa: 4, slug: '4' },
+    { lpa: 4.5, slug: '4-5' },
+    { lpa: 5, slug: '5' },
+    { lpa: 5.5, slug: '5-5' },
+    { lpa: 6, slug: '6' },
+    { lpa: 6.5, slug: '6-5' },
+    { lpa: 7, slug: '7' },
+    { lpa: 7.5, slug: '7-5' },
+    { lpa: 8, slug: '8' },
+    { lpa: 8.5, slug: '8-5' },
+    { lpa: 9, slug: '9' },
+    { lpa: 10, slug: '10' },
+    { lpa: 11, slug: '11' },
+    { lpa: 12, slug: '12' },
+    { lpa: 13, slug: '13' },
+    { lpa: 14, slug: '14' },
+    { lpa: 15, slug: '15' },
+    { lpa: 16, slug: '16' },
+    { lpa: 17, slug: '17' },
+    { lpa: 18, slug: '18' },
+    { lpa: 20, slug: '20' },
+    { lpa: 22, slug: '22' },
+    { lpa: 24, slug: '24' },
+    { lpa: 25, slug: '25' },
+    { lpa: 28, slug: '28' },
+    { lpa: 30, slug: '30' },
+    { lpa: 35, slug: '35' },
+    { lpa: 40, slug: '40' },
+    { lpa: 50, slug: '50' },
+    { lpa: 60, slug: '60' },
+    { lpa: 75, slug: '75' },
+    { lpa: 100, slug: '100' },
+  ];
+
+  return lpaValues.map(({ lpa, slug }) => {
+    const annualCTC = lpa * 100000;
+    const monthlyBasic = (annualCTC * 0.4) / 12;
+
+    // Scenario 1: Applicable Capped PF (Statutory ceiling ₹25,000/mo effective 17 Sep 2026)
+    const breakdownNew = calculateSalary({
+      annualCTC,
+      basicPercent: 40,
+      pfPolicy: 'statutory_ceiling',
+      regime: 'new',
+    });
+
+    // Scenario 2: Full-Basic PF (Voluntary / corporate policy on uncapped basic under Para 26(6))
+    const breakdownFull = calculateSalary({
+      annualCTC,
+      basicPercent: 40,
+      pfPolicy: 'full_basic',
+      regime: 'new',
+    });
+
+    // Scenario 3: Dated Historical PF (Pre-Sept 2026 statutory ceiling of ₹15,000/mo)
+    const breakdownHistorical = calculateSalary({
+      annualCTC,
+      basicPercent: 40,
+      pfPolicy: 'custom',
+      customPfWage: Math.min(monthlyBasic, 15000),
+      regime: 'new',
+    });
+
+    // Comparison with Old Tax Regime
+    const breakdownOld = calculateSalary({
+      annualCTC,
+      basicPercent: 40,
+      pfPolicy: 'statutory_ceiling',
+      regime: 'old',
+    });
+
+    return {
+      params: { slug },
+      props: {
+        lpa,
+        slug,
+        annualCTC,
+        breakdownNew,
+        breakdownFull,
+        breakdownHistorical,
+        breakdownOld,
+      },
+    };
+  });
+}
+
+interface Props {
+  lpa: number;
+  slug: string;
+  annualCTC: number;
+  breakdownNew: ReturnType<typeof calculateSalary>;
+  breakdownFull: ReturnType<typeof calculateSalary>;
+  breakdownHistorical: ReturnType<typeof calculateSalary>;
+  breakdownOld: ReturnType<typeof calculateSalary>;
+}
+
+const { lpa, slug, annualCTC, breakdownNew, breakdownFull, breakdownHistorical, breakdownOld } = Astro.props;
+
+const title = `${lpa} LPA In-Hand Salary 2026–27 | Monthly Take-Home & Tax Breakdown`;
+const description = `What is the in-hand salary for ${lpa} LPA CTC in 2026–27? Monthly bank credit is approx ${formatINR(breakdownNew.monthlyInHand)} under the New Tax Regime. Detailed PF, gratuity, and tax calculation.`;
+
+const canonicalPath = `/salary/${slug}-lpa-in-hand-salary`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: `${lpa} LPA In-Hand Salary Breakdown — ${site.name}`,
+  description,
+  url: `${site.url}${canonicalPath}`,
+  author: { '@type': 'Organization', name: site.name },
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: `What is the monthly in-hand salary for ${lpa} LPA?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `For an annual CTC of ${lpa} Lakh (₹${(lpa * 100000).toLocaleString('en-IN')}), your estimated monthly in-hand take-home salary is approximately ${formatINR(breakdownNew.monthlyInHand)} per month under the New Tax Regime (Tax Year 2026–27).`,
+      },
+    },
+    {
+      '@type': 'Question',
+      name: `How much tax do I pay on ${lpa} LPA in 2026–27?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: breakdownNew.tax.totalTax === 0
+          ? `You pay ₹0 in income tax on ${lpa} LPA CTC under the New Tax Regime! Because your taxable income after standard deduction is within the ₹12,00,000 threshold, you receive a 100% tax rebate under Section 156.`
+          : `Under the New Tax Regime, your estimated annual income tax on ${lpa} LPA is approximately ${formatINR(breakdownNew.tax.totalTax)} (about ${formatINR(breakdownNew.tax.monthlyTDS)} per month TDS).`,
+      },
+    },
+    {
+      '@type': 'Question',
+      name: `What is the EPF deduction for ${lpa} LPA?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `With the statutory wage ceiling set at ₹25,000/month (effective 17 September 2026), your employee PF deduction is ${formatINR(breakdownNew.monthlyEmployeePF)} per month (${formatINR(breakdownNew.employeePF)} annually), matched by an equal employer contribution.`,
+      },
+    },
+  ],
+};
+
+const allLpas = [2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 25, 28, 30, 35, 40, 50, 60, 75, 100];
+const nearbyLpas = allLpas.filter((n) => n !== lpa && Math.abs(n - lpa) <= (lpa <= 10 ? 3 : lpa <= 30 ? 6 : 15)).slice(0, 8);
+
+// Eligibility calculations for Marginal Relief & Employer NPS:
+// Calculate actual taxable income first; NEVER determine eligibility from CTC alone.
+const taxableIncome = breakdownNew.tax.taxableIncome;
+const slabTax = breakdownNew.tax.slabTax;
+const rebate = breakdownNew.tax.rebate;
+const isZeroTax = breakdownNew.tax.totalTax === 0;
+// Section 156 Marginal relief triggers ONLY when taxable income exceeds ₹12,00,000
+// AND slab tax > excess income over ₹12,00,000 (which leaves rebate > 0)
+const isMarginalReliefEligible = taxableIncome > 1200000 && rebate > 0;
+const excessIncomeOver12L = Math.max(0, taxableIncome - 1200000);
+
+// Employer NPS (Section 124 / legacy 80CCD(2)):
+const maxEmployerNPS = Math.round(breakdownNew.annualBasic * 0.14);
+const taxableIncomeAfterNPS = Math.max(0, taxableIncome - maxEmployerNPS);
+const topMarginalRate = taxableIncome > 2400000 ? 0.30 : taxableIncome > 2000000 ? 0.25 : taxableIncome > 1600000 ? 0.20 : taxableIncome > 1200000 ? 0.15 : taxableIncome > 800000 ? 0.10 : 0.05;
+const estimatedNPSSavings = Math.round(maxEmployerNPS * topMarginalRate * 1.04);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="/ctc-to-inhand-calculator">Calculators</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>{lpa} LPA Salary</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: In-Hand Hero Card & Quick Specs ═══ -->
+      <div class="calc-inputs">
+        <div class="card card-hero-result">
+          <div class="hero-result-header">
+            <span class="hero-result-label">{lpa} Lakh Annual CTC</span>
+            <span class="badge badge-success">New Regime 2026–27</span>
+          </div>
+
+          <div class="hero-result-amount text-success">{formatINR(breakdownNew.monthlyInHand)} / mo</div>
+          <div class="hero-result-sub">
+            Estimated monthly bank credit ({formatINR(breakdownNew.annualInHand)} annual take-home)
+          </div>
+
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">Annual CTC</span>
+              <span class="stat-val font-mono">{formatINR(annualCTC)}</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Annual Income Tax</span>
+              <span class="stat-val font-mono text-danger">{formatINR(breakdownNew.tax.totalTax)}</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly Employee PF</span>
+              <span class="stat-val font-mono">{formatINR(breakdownNew.monthlyEmployeePF)}</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly Gross</span>
+              <span class="stat-val font-mono">{formatINR(breakdownNew.monthlyGross)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customizer CTA -->
+        <div class="card mt-lg">
+          <h3 class="title-sm mb-xs">Want to Customize Assumptions?</h3>
+          <p class="body-sm text-muted mb-md">
+            Do you have variable pay, joining bonus, employer NPS, or different PF policies? Adjust assumptions in our full calculator.
+          </p>
+          <a href="/ctc-to-inhand-calculator" class="btn btn-primary btn-block">
+            Open Full Interactive CTC Decoder →
+          </a>
+        </div>
+
+        <!-- Ad Slot -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-lpa-1">
+            <div class="ad-placeholder">
+              <span>Salary Account Perks, Instant Overdraft & Zero Fee Credit Cards</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Salary Brackets -->
+        <div class="card mt-lg bg-soft">
+          <h3 class="title-sm mb-xs">Compare Nearby CTCs</h3>
+          <div class="lpa-chips-grid mt-sm">
+            {nearbyLpas.map((nearLpa) => {
+              const nearSlug = String(nearLpa).replace('.', '-');
+              return (
+                <a href={`/salary/${nearSlug}-lpa-in-hand-salary`} class="lpa-link-chip">
+                  {nearLpa} LPA
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ Right: Complete Line-by-Line Breakdown ═══ -->
+      <div class="calc-results">
+
+        <div class="card">
+          <h1 class="display-sm mb-xs">{lpa} LPA In-Hand Salary Breakdown</h1>
+          <p class="body-sm text-muted mb-xl">
+            Detailed salary structure for ₹{(lpa * 100000).toLocaleString('en-IN')} annual CTC under the Income-tax Act, 2025.
+          </p>
+
+          <h2 class="title-sm mb-sm">Earnings & Cash Components</h2>
+          <div class="table-container mb-lg">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th class="text-right">Monthly</th>
+                  <th class="text-right">Annual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Basic Salary (40% of CTC)</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.monthlyBasic)}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.annualBasic)}</td>
+                </tr>
+                <tr>
+                  <td>House Rent Allowance (HRA)</td>
+                  <td class="text-right font-mono">{formatINR(Math.round(breakdownNew.annualHRA / 12))}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.annualHRA)}</td>
+                </tr>
+                <tr>
+                  <td>Special Allowance / Other Allowances</td>
+                  <td class="text-right font-mono">{formatINR(Math.round(breakdownNew.annualSpecialAllowance / 12))}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.annualSpecialAllowance)}</td>
+                </tr>
+                <tr style="font-weight:600; background:var(--color-surface-soft);">
+                  <td>Gross Salary</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.monthlyGross)}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.annualGross)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="title-sm mb-sm">Monthly Deductions</h2>
+          <div class="table-container mb-lg">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Deduction Item</th>
+                  <th class="text-right">Monthly</th>
+                  <th class="text-right">Annual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Employee Provident Fund (12%)</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.monthlyEmployeePF)}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.employeePF)}</td>
+                </tr>
+                <tr>
+                  <td>Income Tax (Monthly TDS)</td>
+                  <td class="text-right font-mono text-danger">{formatINR(breakdownNew.tax.monthlyTDS)}</td>
+                  <td class="text-right font-mono text-danger">{formatINR(breakdownNew.tax.totalTax)}</td>
+                </tr>
+                <tr>
+                  <td>Professional Tax (PT)</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.monthlyProfessionalTax)}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.professionalTax)}</td>
+                </tr>
+                <tr style="font-weight:700; background:rgba(5, 177, 105, 0.08);">
+                  <td>Net Monthly Bank Credit (Take-Home)</td>
+                  <td class="text-right font-mono text-success">{formatINR(breakdownNew.monthlyInHand)}</td>
+                  <td class="text-right font-mono text-success">{formatINR(breakdownNew.annualInHand)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="title-sm mb-sm">Employer Non-Cash Contributions (Included in CTC)</h2>
+          <div class="table-container mb-base">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Employer Cost Item</th>
+                  <th class="text-right">Monthly</th>
+                  <th class="text-right">Annual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Employer PF Contribution (12%)</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.employerPF.monthlyEmployerPF)}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.employerPF.annualEmployerPF)}</td>
+                </tr>
+                <tr>
+                  <td>Gratuity Accrual Provision (~4.81% of basic)</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.gratuity.monthlyAccrual)}</td>
+                  <td class="text-right font-mono">{formatINR(breakdownNew.gratuity.annualAccrual)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ═══ 3-Scenario PF Comparison Table ═══ -->
+        <div class="card mt-lg">
+          <div class="badge badge-primary mb-xs">Statutory Legal Analysis</div>
+          <h2 class="title-md mb-xs">Three-Scenario Provident Fund (EPF) Comparison</h2>
+          <p class="body-sm text-muted mb-lg">
+            Understand how different corporate PF policies affect your bank credit versus retirement corpus. We clearly differentiate mandatory statutory rules from optional corporate schemes.
+          </p>
+
+          <div class="table-container mb-lg">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Metric / PF Treatment</th>
+                  <th>Scenario 1: Statutory Capped PF (₹25k Ceiling)</th>
+                  <th>Scenario 2: Full-Basic PF (Uncapped Voluntary)</th>
+                  <th>Scenario 3: Historical Baseline (₹15k Ceiling)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Legal Classification</strong></td>
+                  <td><span class="badge badge-success">Statutory Mandate</span></td>
+                  <td><span class="badge badge-neutral">Voluntary / Contractual</span></td>
+                  <td><span class="badge badge-neutral">Dated Statutory (Pre-Sep 2026)</span></td>
+                </tr>
+                <tr>
+                  <td>Statutory Legal Authority</td>
+                  <td class="caption">EPFO Gazette Notification (w.e.f. 17 Sep 2026)</td>
+                  <td class="caption">Joint Declaration under Para 26(6) EPF Scheme</td>
+                  <td class="caption">Notification S.O. 2259(E) (2014–2026)</td>
+                </tr>
+                <tr>
+                  <td>Monthly PF Wage Base</td>
+                  <td class="font-mono">{formatINR(breakdownNew.employerPF.pfWageBase)}</td>
+                  <td class="font-mono">{formatINR(breakdownFull.employerPF.pfWageBase)}</td>
+                  <td class="font-mono">{formatINR(breakdownHistorical.employerPF.pfWageBase)}</td>
+                </tr>
+                <tr>
+                  <td><strong>Employee PF (Deducted from Salary)</strong></td>
+                  <td class="font-mono text-danger">{formatINR(breakdownNew.monthlyEmployeePF)}/mo</td>
+                  <td class="font-mono text-danger">{formatINR(breakdownFull.monthlyEmployeePF)}/mo</td>
+                  <td class="font-mono text-danger">{formatINR(breakdownHistorical.monthlyEmployeePF)}/mo</td>
+                </tr>
+                <tr>
+                  <td><strong>Employer PF (Retiral Cost in CTC)</strong></td>
+                  <td class="font-mono">{formatINR(breakdownNew.employerPF.monthlyEmployerPF)}/mo</td>
+                  <td class="font-mono">{formatINR(breakdownFull.employerPF.monthlyEmployerPF)}/mo</td>
+                  <td class="font-mono">{formatINR(breakdownHistorical.employerPF.monthlyEmployerPF)}/mo</td>
+                </tr>
+                <tr style="background: rgba(5, 177, 105, 0.08); font-weight: 700;">
+                  <td><strong>Monthly In-Hand Bank Credit</strong></td>
+                  <td class="font-mono text-success">{formatINR(breakdownNew.monthlyInHand)}</td>
+                  <td class="font-mono text-success">{formatINR(breakdownFull.monthlyInHand)}</td>
+                  <td class="font-mono text-success">{formatINR(breakdownHistorical.monthlyInHand)}</td>
+                </tr>
+                <tr>
+                  <td>Annual Take-Home Pay</td>
+                  <td class="font-mono">{formatINR(breakdownNew.annualInHand)}</td>
+                  <td class="font-mono">{formatINR(breakdownFull.annualInHand)}</td>
+                  <td class="font-mono">{formatINR(breakdownHistorical.annualInHand)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="alert alert-info p-md">
+            <p class="body-sm" style="margin:0;">
+              <strong>Key Takeaway:</strong> Under the statutory wage ceiling (₹25,000/mo), your monthly bank credit is <strong>{formatINR(breakdownNew.monthlyInHand)}</strong>. If your employer adopts full-basic PF, your immediate monthly take-home decreases by <strong>{formatINR(Math.max(0, breakdownNew.monthlyInHand - breakdownFull.monthlyInHand))}</strong>, but your compound retirement balance in the EPF increases by double that amount due to the equal employer matching contribution.
+            </p>
+          </div>
+        </div>
+
+        <!-- Ad Slot 2 -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-lpa-2">
+            <div class="ad-placeholder">
+              <span>Personal Loan Rates & Emergency Funds for Salaried Professionals</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══ In-Depth Editorial Analysis ═══ -->
+    <section class="seo-guide mt-xxl pt-xl border-top">
+      <div class="max-content-text">
+        <h2 class="display-sm mb-md">Tax & Compliance Analysis for {lpa} LPA CTC in 2026–27</h2>
+
+        <!-- Section 156 Tax & Rebate Analysis based strictly on calculated taxable income -->
+        {isZeroTax ? (
+          <div class="card bg-soft p-lg mb-lg border-primary">
+            <h3 class="title-sm text-success mb-xs">✓ 100% Tax Exemption via Section 156 Rebate</h3>
+            <p class="body-md text-body">
+              With a headline CTC of {lpa} Lakh, your calculated gross salary is {formatINR(breakdownNew.annualGross)}.
+              After deducting the statutory <strong>₹75,000 Standard Deduction</strong> (Section 19 of the Income-tax Act, 2025), your <strong>actual taxable income is {formatINR(taxableIncome)}</strong>.
+              Because your taxable income does not exceed the statutory ₹12,00,000 threshold, you receive a full tax rebate of up to ₹60,000 under Section 156.
+              Your <strong>total annual income tax liability is exactly ₹0</strong>.
+            </p>
+          </div>
+        ) : isMarginalReliefEligible ? (
+          <div class="card bg-soft p-lg mb-lg border-accent">
+            <h3 class="title-sm text-primary mb-xs">⚖ Section 156 Marginal Relief Applies</h3>
+            <p class="body-md text-body">
+              For an annual CTC of {lpa} Lakh, after the ₹75,000 standard deduction, your <strong>calculated taxable income is {formatINR(taxableIncome)}</strong>.
+              Because your taxable income marginally exceeds the ₹12,00,000 rebate threshold by {formatINR(excessIncomeOver12L)},
+              standard slab calculations would result in a tax of {formatINR(slabTax)}. Under <strong>Section 156 Marginal Relief</strong>, your income tax before cess is legally capped at exactly the excess income over ₹12 Lakh ({formatINR(excessIncomeOver12L)}), granting you a marginal relief rebate of <strong>{formatINR(rebate)}</strong>!
+            </p>
+          </div>
+        ) : (
+          <div class="card bg-soft p-lg mb-lg">
+            <h3 class="title-sm mb-xs">Tax Calculation (Taxable Income: {formatINR(taxableIncome)})</h3>
+            <p class="body-md text-body">
+              After the statutory ₹75,000 standard deduction under Section 19, your taxable income is <strong>{formatINR(taxableIncome)}</strong>.
+              Because taxable income exceeds the Section 156 rebate cliff (~₹12.75 Lakh), normal progressive slab rates apply under Section 202:
+              total annual income tax is <strong>{formatINR(breakdownNew.tax.totalTax)}</strong> (approx {formatINR(breakdownNew.tax.monthlyTDS)} per month TDS, inclusive of 4% Health & Education Cess).
+            </p>
+          </div>
+        )}
+
+        <!-- Employer NPS Section (Section 124) based strictly on Basic & Taxable Income -->
+        <div class="card p-lg mb-lg">
+          <h3 class="title-sm mb-xs">Employer NPS Restructuring (Section 124 / Legacy 80CCD(2))</h3>
+          <p class="body-sm text-muted mb-md">
+            Eligibility and savings evaluated from your actual annual Basic Salary of <strong>{formatINR(breakdownNew.annualBasic)}</strong> and taxable income of <strong>{formatINR(taxableIncome)}</strong>:
+          </p>
+          <div class="nps-box p-md bg-canvas border rounded">
+            <p class="body-sm text-body mb-xs">
+              • <strong>Maximum Deductible Contribution:</strong> Under Section 124 of the Income-tax Act, 2025, your employer can deposit up to 14% of your Basic into Tier-1 NPS: <strong>{formatINR(maxEmployerNPS)} per year</strong> ({formatINR(Math.round(maxEmployerNPS / 12))} per month).
+            </p>
+            <p class="body-sm text-body mb-xs">
+              • <strong>Tax Base Reduction:</strong> If structured in your compensation, your taxable income decreases from {formatINR(taxableIncome)} to <strong>{formatINR(taxableIncomeAfterNPS)}</strong>.
+            </p>
+            {isZeroTax ? (
+              <p class="body-sm text-muted">
+                • <em>Current Eligibility Note:</em> Because your current tax liability is already ₹0 under Section 156 rebate, NPS restructuring will not reduce immediate tax further, but builds government-regulated retirement wealth.
+              </p>
+            ) : (
+              <p class="body-sm text-success font-bold">
+                • <em>Estimated Annual Tax Savings:</em> Up to approximately {formatINR(estimatedNPSSavings)} per year saved at your marginal tax bracket!
+              </p>
+            )}
+          </div>
+        </div>
+
+        <h3 class="title-lg mb-sm">Frequently Asked Questions</h3>
+        <div class="faq-accordion mt-md">
+          <details class="faq-item" open>
+            <summary class="faq-question">What is the monthly in-hand salary for {lpa} LPA?</summary>
+            <div class="faq-answer">
+              <p>Under standard corporate payroll structures in India, an employee with a {lpa} LPA CTC receives approximately <strong>{formatINR(breakdownNew.monthlyInHand)} per month</strong> in their bank account.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How does the New vs Old Tax Regime compare for {lpa} LPA?</summary>
+            <div class="faq-answer">
+              <p>Under the New Regime, tax is {formatINR(breakdownNew.tax.totalTax)}. Under the Old Regime without extra investments, tax would be {formatINR(breakdownOld.tax.totalTax)}. The New Regime saves you {formatINR(Math.max(0, breakdownOld.tax.totalTax - breakdownNew.tax.totalTax))} in tax.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Is EPF contribution on full basic salary mandatory by law?</summary>
+            <div class="faq-answer">
+              <p>No. Under the Employees' Provident Funds and Miscellaneous Provisions Act, 1952, statutory compliance is fulfilled by contributing 12% up to the statutory wage ceiling of ₹25,000/month (notified 17 September 2026). Any contribution on basic salary above ₹25,000 is voluntary and contractual under Paragraph 26(6) of the EPF Scheme.</p>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 440px 1fr;
+    }
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .lpa-chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .lpa-link-chip {
+    padding: 6px 12px;
+    background: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-pill);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-body-strong);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .lpa-link-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+
+  .font-mono { font-family: var(--font-mono); }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-content-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    background: var(--color-canvas);
+  }
+
+  .faq-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-body);
+  }
+
+  .border-primary { border: 1px solid var(--color-primary-soft); }
+  .border-accent { border: 1px solid #e2b714; }
+  .caption { font-size: 12px; color: var(--color-muted); }
+  .nps-box { background: var(--color-surface); border: 1px solid var(--color-hairline); border-radius: var(--rounded-md); }
+</style>

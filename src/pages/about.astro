@@ -1,0 +1,120 @@
+---
+/**
+ * About PayDecode
+ * Mission, editorial transparency, independent engineering, and principles.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'About PayDecode | India\'s Most Transparent Salary Calculator';
+const description = 'Learn why we built PayDecode — the privacy-first, fully transparent salary decoder designed to help Indian professionals decode offer letters and understand their real take-home pay.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/about`,
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/about"
+  jsonLd={jsonLd}
+>
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>About</span>
+    </nav>
+  </div>
+
+  <div class="container pb-xxl">
+    <div class="max-content-text">
+      <div class="badge badge-accent mb-sm">Our Mission</div>
+      <h1 class="display-sm mb-sm">About PayDecode</h1>
+      <p class="body-md text-muted mb-xl">
+        Demystifying Indian salary structures, offer letters, and take-home pay through honest, transparent software.
+      </p>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">Why We Built PayDecode</h2>
+        <p class="body-md text-body mb-base">
+          In India, the concept of &ldquo;Cost to Company&rdquo; (CTC) has become unnecessarily opaque. Job offers advertise astronomical headline CTC figures, but when candidates receive their first monthly paycheck, the actual money deposited into their bank account is frequently 25% to 40% lower than expected.
+        </p>
+        <p class="body-md text-body mb-base">
+          Existing online calculators make oversimplified assumptions: hardcoding 30% taxes on bonuses, hiding PF wage ceilings, or omitting employer-side deductions altogether.
+        </p>
+        <p class="body-md text-body">
+          We built <strong>PayDecode</strong> to give every Indian employee, fresher, engineer, and manager the exact mathematical truth behind their compensation package.
+        </p>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">Our 4 Core Engineering Principles</h2>
+        <div class="principles-grid">
+          <div class="card p-md">
+            <h3 class="title-sm mb-xs text-primary">1. Correctness Over Volume</h3>
+            <p class="body-sm text-body">
+              We never guess financial rules. Every calculation is verified against the Income-tax Act, 2025 and official government notifications, supported by automated unit test suites.
+            </p>
+          </div>
+          <div class="card p-md">
+            <h3 class="title-sm mb-xs text-primary">2. Absolute Transparency</h3>
+            <p class="body-sm text-body">
+              Every assumption is exposed and editable: basic percentage, PF policy (statutory ceiling vs full basic), gratuity provisions, professional tax, and variable pay.
+            </p>
+          </div>
+          <div class="card p-md">
+            <h3 class="title-sm mb-xs text-primary">3. Privacy by Design</h3>
+            <p class="body-sm text-body">
+              We never upload your salary numbers to a server or cloud database. Calculations happen 100% locally in your web browser.
+            </p>
+          </div>
+          <div class="card p-md">
+            <h3 class="title-sm mb-xs text-primary">4. Editorial Calm</h3>
+            <p class="body-sm text-body">
+              Inspired by institutional financial interfaces, our UI prioritizes readability, precision typography, and zero gimmicks.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-xl">
+        <h2 class="title-lg mb-sm">Stay In Touch</h2>
+        <p class="body-md text-body mb-sm">
+          Have feedback on our calculations, noticed a recent state statutory change, or want to suggest a new tool?
+        </p>
+        <a href="/contact" class="btn btn-primary">
+          Contact the PayDecode Team →
+        </a>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .max-content-text {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  @media (min-width: 768px) {
+    .principles-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+</style>

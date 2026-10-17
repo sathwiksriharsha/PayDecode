@@ -1,0 +1,725 @@
+---
+/**
+ * Salary Hike Calculator (Appraisal & Job Switch Salary Increment Tool)
+ * Compares pre-tax CTC hike with post-tax in-hand bank credit change.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Salary Hike Calculator 2026–27 | Pre-Tax CTC vs In-Hand Take Home';
+const description = 'Calculate your real in-hand salary increase after a job switch or appraisal hike. Compare nominal CTC hike % vs actual monthly take-home percentage under New Tax Regime 2026–27.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/salary-hike-calculator`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: 'Salary Hike Calculator', item: `${site.url}/salary-hike-calculator` },
+  ],
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Why is my take-home hike percentage lower than my CTC hike percentage?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Because Indian income tax is progressive. As your CTC increases, the incremental income is taxed at your marginal slab rate (e.g., 15%, 20%, or 30% plus 4% cess). Additionally, higher basic salary increases employee PF and employer PF deductions. Therefore, a 30% CTC hike usually translates to roughly a 20% to 24% increase in net take-home pay.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is a good salary hike percentage when switching jobs in India?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'In the Indian tech and corporate sector, a typical job switch hike ranges between 25% and 40% of fixed CTC. Always negotiate based on Fixed Cash Salary rather than headline CTC with large inflated variable bonuses or multi-year vesting stocks.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How is appraisal hike calculated on CTC?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Annual CTC Hike = ((New CTC - Current CTC) / Current CTC) * 100. However, to evaluate the real benefit, compute your net monthly in-hand increase after applying income tax and provident fund rules.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/salary-hike-calculator"
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Salary Hike Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Input Panel ═══ -->
+      <div class="calc-inputs">
+        <div class="card">
+          <div class="badge badge-accent mb-sm">Appraisal & Job Switch Tool</div>
+          <h1 class="display-sm mb-xs">Salary Hike Calculator</h1>
+          <p class="body-sm text-muted mb-xl">
+            See the honest reality of your appraisal or job offer hike. Calculate your actual monthly take-home bump after taxes.
+          </p>
+
+          <!-- Current CTC -->
+          <div class="input-group">
+            <label for="current-ctc" class="input-label">Current Annual CTC</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="text"
+                id="current-ctc"
+                class="input input-number"
+                placeholder="e.g. 10,00,000 or 10L"
+                value="1000000"
+              />
+            </div>
+          </div>
+
+          <!-- Hike Percentage or New CTC -->
+          <div class="input-group">
+            <label for="hike-percent" class="input-label">Offered Hike Percentage (%)</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">%</span>
+              <input
+                type="number"
+                id="hike-percent"
+                class="input"
+                placeholder="e.g. 30"
+                value="30"
+                min="0"
+                max="500"
+                step="0.5"
+              />
+            </div>
+            <!-- Quick Hike Chips -->
+            <div class="quick-chips mt-xs">
+              <button type="button" class="hike-chip" data-hike="10">10%</button>
+              <button type="button" class="hike-chip" data-hike="20">20%</button>
+              <button type="button" class="hike-chip active" data-hike="30">30%</button>
+              <button type="button" class="hike-chip" data-hike="40">40%</button>
+              <button type="button" class="hike-chip" data-hike="50">50%</button>
+            </div>
+          </div>
+
+          <!-- Or Enter New CTC Directly -->
+          <div class="input-group">
+            <label for="new-ctc" class="input-label">Or Directly Enter New CTC</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="text"
+                id="new-ctc"
+                class="input input-number"
+                placeholder="e.g. 13,00,000"
+                value="1300000"
+              />
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="input-group">
+            <label class="input-label">Tax Regime</label>
+            <div class="radio-group">
+              <label class="radio-pill">
+                <input type="radio" name="regime" value="new" checked /> New Regime 2026–27
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="regime" value="old" /> Old Regime
+              </label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">PF Policy</label>
+            <select id="pf-policy" class="input">
+              <option value="statutory_ceiling" selected>Statutory Ceiling (₹25,000/mo cap)</option>
+              <option value="full_basic">Full Basic (12% of basic)</option>
+            </select>
+          </div>
+
+          <button id="calc-hike-btn" class="btn btn-primary btn-block mt-md">
+            Calculate Hike Impact
+          </button>
+        </div>
+
+        <!-- Ad Slot: Compliant responsive ad container -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-hike-1">
+            <div class="ad-placeholder">
+              <span>Top Tech Job Openings & Career Switch Salaries</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Right: Result Panel ═══ -->
+      <div class="calc-results">
+        <!-- Hero Comparison Banner -->
+        <div class="card card-hero-result" id="hike-hero-card">
+          <div class="hero-result-header">
+            <span class="hero-result-label">Real In-Hand Monthly Hike</span>
+            <span class="badge badge-accent" id="real-hike-badge">+23.5% Take-Home</span>
+          </div>
+
+          <div class="hero-result-amount text-success" id="monthly-inhand-diff">+₹17,450 / mo</div>
+          <div class="hero-result-sub" id="annual-inhand-diff">That's +₹2,09,400 additional net cash per year in your bank account</div>
+
+          <!-- Comparison Grid -->
+          <div class="hike-comparison-grid mt-lg">
+            <div class="hike-comp-col">
+              <span class="comp-col-title">Before Hike</span>
+              <div class="comp-metric">
+                <span class="comp-label">Annual CTC</span>
+                <span class="comp-val" id="before-ctc">₹10,00,000</span>
+              </div>
+              <div class="comp-metric">
+                <span class="comp-label">Monthly In-Hand</span>
+                <span class="comp-val text-white" id="before-inhand">₹74,200</span>
+              </div>
+              <div class="comp-metric">
+                <span class="comp-label">Annual Tax</span>
+                <span class="comp-val text-muted-soft" id="before-tax">₹0</span>
+              </div>
+            </div>
+
+            <div class="hike-comp-divider">
+              <span class="divider-arrow">→</span>
+            </div>
+
+            <div class="hike-comp-col">
+              <span class="comp-col-title text-success">After Hike</span>
+              <div class="comp-metric">
+                <span class="comp-label">New Annual CTC</span>
+                <span class="comp-val" id="after-ctc">₹13,00,000</span>
+              </div>
+              <div class="comp-metric">
+                <span class="comp-label">Monthly In-Hand</span>
+                <span class="comp-val text-success" id="after-inhand">₹91,650</span>
+              </div>
+              <div class="comp-metric">
+                <span class="comp-label">Annual Tax</span>
+                <span class="comp-val text-danger" id="after-tax">₹72,800</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reality Check Card -->
+        <div class="card mt-lg">
+          <h2 class="title-sm mb-md">CTC Hike vs Real Take-Home Reality Check</h2>
+
+          <div class="reality-stats-row">
+            <div class="reality-stat">
+              <span class="stat-num" id="stat-nominal-hike">30.0%</span>
+              <span class="stat-text">Paper CTC Hike</span>
+            </div>
+            <div class="reality-vs">vs</div>
+            <div class="reality-stat">
+              <span class="stat-num text-success" id="stat-real-hike">23.5%</span>
+              <span class="stat-text">Actual In-Hand Hike</span>
+            </div>
+          </div>
+
+          <div class="table-container mt-lg">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th class="text-right">Current</th>
+                  <th class="text-right">New</th>
+                  <th class="text-right">Absolute Change</th>
+                </tr>
+              </thead>
+              <tbody id="hike-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ad Slot 2: Mid-content responsive ad -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-hike-2">
+            <div class="ad-placeholder">
+              <span>Financial Advisory & High-Yield Fixed Deposit Rates</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══ SEO Educational Article ═══ -->
+    <section class="seo-guide mt-xxl pt-xl border-top">
+      <div class="max-content-text">
+        <h2 class="display-sm mb-md">Understanding How Salary Hikes Work in India</h2>
+        <p class="body-md text-body mb-lg">
+          Receiving a 20%, 30%, or 50% hike is exciting, but employees are often surprised when their monthly bank credit increases by significantly less than the headline hike percentage. Understanding the math helps you negotiate more effectively and budget accurately.
+        </p>
+
+        <h3 class="title-lg mb-sm">The 3 Culprits That Reduce Your Take-Home Hike</h3>
+        <ul class="seo-list mb-lg">
+          <li>
+            <strong>1. Progressive Income Tax Slabs:</strong> In India, you only pay higher tax on income above slab thresholds. For instance, if your salary moves from ₹12 Lakh to ₹15 Lakh, that top ₹3 Lakh is taxed at 15% plus 4% cess. If it moves above ₹24 Lakh, the top portion is taxed at 30%.
+          </li>
+          <li>
+            <strong>2. Loss of the Section 156 Tax Rebate:</strong> Under the New Tax Regime (Tax Year 2026–27), taxable income up to ₹12 Lakh enjoys a 100% tax rebate (up to ₹60,000). Once your taxable income crosses ₹12 Lakh, marginal relief buffers the immediate jump, but your overall tax liability will increase.
+          </li>
+          <li>
+            <strong>3. Statutory Deductions (EPF & Gratuity):</strong> When CTC rises, basic salary rises proportionally. With the EPFO wage ceiling set at ₹25,000/month (from 17 September 2026), full basic PF structures take an extra 12% chunk of the increase.
+          </li>
+        </ul>
+
+        <h3 class="title-lg mb-sm">Frequently Asked Questions</h3>
+        <div class="faq-accordion mt-md">
+          <details class="faq-item" open>
+            <summary class="faq-question">What is a 30% hike on a 10 LPA salary?</summary>
+            <div class="faq-answer">
+              <p>A 30% hike on ₹10 Lakh CTC brings your new CTC to ₹13 Lakh. Your monthly in-hand salary increases from approx ₹74,200 to approx ₹91,650 (an increase of about ₹17,450/month under the New Regime), reflecting an actual take-home increase of ~23.5%.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How can I maximize my take-home pay during hike negotiations?</summary>
+            <div class="faq-answer">
+              <p>Ask your recruiter for higher <strong>Fixed Cash Components</strong> and lower variable pay percentages. Inquire if they can structure allowances for maximum tax efficiency (such as employer NPS under Section 124, which is exempt up to 14% of basic salary in the New Regime).</p>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 440px 1fr;
+    }
+  }
+
+  .quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .hike-chip {
+    padding: 4px 10px;
+    border-radius: var(--rounded-pill);
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-body);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .hike-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .hike-chip.active {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hike-comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--space-md);
+    align-items: center;
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hike-comp-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .comp-col-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .comp-metric {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .comp-label {
+    color: var(--color-on-dark-soft);
+  }
+
+  .comp-val {
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .hike-comp-divider {
+    font-size: 24px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .reality-stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    padding: var(--space-md);
+    background: var(--color-surface-soft);
+    border-radius: var(--rounded-md);
+  }
+
+  .reality-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+
+  .stat-text {
+    font-size: 12px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .reality-vs {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-muted-soft);
+    text-transform: uppercase;
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+  .text-white { color: #ffffff !important; }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-content-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    background: var(--color-canvas);
+  }
+
+  .faq-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-body);
+  }
+</style>
+
+<script>
+  import { calculateSalary } from '../utils/salaryEngine';
+  import { parseSalaryInput, formatINR } from '../utils/formatCurrency';
+  import type { PfPolicy } from '../config/statutoryRules';
+  import type { TaxRegime } from '../utils/taxEngine';
+
+  const currentCtcInput = document.getElementById('current-ctc') as HTMLInputElement;
+  const hikePercentInput = document.getElementById('hike-percent') as HTMLInputElement;
+  const newCtcInput = document.getElementById('new-ctc') as HTMLInputElement;
+  const pfSelect = document.getElementById('pf-policy') as HTMLSelectElement;
+  const calcBtn = document.getElementById('calc-hike-btn') as HTMLButtonElement;
+  const chips = document.querySelectorAll('.hike-chip');
+
+  // Outputs
+  const monthlyInhandDiff = document.getElementById('monthly-inhand-diff')!;
+  const annualInhandDiff = document.getElementById('annual-inhand-diff')!;
+  const realHikeBadge = document.getElementById('real-hike-badge')!;
+  const beforeCtc = document.getElementById('before-ctc')!;
+  const beforeInhand = document.getElementById('before-inhand')!;
+  const beforeTax = document.getElementById('before-tax')!;
+  const afterCtc = document.getElementById('after-ctc')!;
+  const afterInhand = document.getElementById('after-inhand')!;
+  const afterTax = document.getElementById('after-tax')!;
+  const statNominalHike = document.getElementById('stat-nominal-hike')!;
+  const statRealHike = document.getElementById('stat-real-hike')!;
+  const hikeTableBody = document.getElementById('hike-table-body')!;
+
+  function getSelectedRegime(): TaxRegime {
+    const checked = document.querySelector('input[name="regime"]:checked') as HTMLInputElement;
+    return (checked?.value ?? 'new') as TaxRegime;
+  }
+
+  function runHikeCalc(source: 'percent' | 'newCtc' = 'percent') {
+    const currCTC = parseSalaryInput(currentCtcInput.value);
+    if (!currCTC || currCTC <= 0) return;
+
+    let targetNewCTC = 0;
+    let hikePct = 0;
+
+    if (source === 'percent') {
+      hikePct = Number(hikePercentInput.value) || 0;
+      targetNewCTC = Math.round(currCTC * (1 + hikePct / 100));
+      newCtcInput.value = targetNewCTC.toString();
+    } else {
+      targetNewCTC = parseSalaryInput(newCtcInput.value);
+      if (!targetNewCTC || targetNewCTC <= 0) return;
+      hikePct = ((targetNewCTC - currCTC) / currCTC) * 100;
+      hikePercentInput.value = hikePct.toFixed(1);
+    }
+
+    const regime = getSelectedRegime();
+    const pfPolicy = pfSelect.value as PfPolicy;
+
+    // Run both calculations
+    const resBefore = calculateSalary({
+      annualCTC: currCTC,
+      basicPercent: 40,
+      pfPolicy,
+      regime,
+    });
+
+    const resAfter = calculateSalary({
+      annualCTC: targetNewCTC,
+      basicPercent: 40,
+      pfPolicy,
+      regime,
+    });
+
+    const diffMonthlyInhand = resAfter.monthlyInHand - resBefore.monthlyInHand;
+    const diffAnnualInhand = resAfter.annualInHand - resBefore.annualInHand;
+    const realTakeHomeHikePct = ((diffAnnualInhand / resBefore.annualInHand) * 100);
+
+    // Update Banner
+    monthlyInhandDiff.textContent = `${diffMonthlyInhand >= 0 ? '+' : ''}${formatINR(diffMonthlyInhand)} / mo`;
+    annualInhandDiff.textContent = `That's ${diffAnnualInhand >= 0 ? '+' : ''}${formatINR(diffAnnualInhand)} net take-home per year in your bank account`;
+    realHikeBadge.textContent = `${realTakeHomeHikePct >= 0 ? '+' : ''}${realTakeHomeHikePct.toFixed(1)}% Take-Home`;
+
+    // Comparison columns
+    beforeCtc.textContent = formatINR(currCTC);
+    beforeInhand.textContent = formatINR(resBefore.monthlyInHand);
+    beforeTax.textContent = formatINR(resBefore.tax.totalTax);
+
+    afterCtc.textContent = formatINR(targetNewCTC);
+    afterInhand.textContent = formatINR(resAfter.monthlyInHand);
+    afterTax.textContent = formatINR(resAfter.tax.totalTax);
+
+    // Reality check stats
+    statNominalHike.textContent = `${hikePct.toFixed(1)}%`;
+    statRealHike.textContent = `${realTakeHomeHikePct.toFixed(1)}%`;
+
+    // Comparison Table
+    const tableRows = [
+      {
+        name: 'Annual CTC',
+        before: formatINR(currCTC),
+        after: formatINR(targetNewCTC),
+        change: `+${formatINR(targetNewCTC - currCTC)} (${hikePct.toFixed(1)}%)`,
+        highlight: false,
+      },
+      {
+        name: 'Monthly Take-Home In-Hand',
+        before: formatINR(resBefore.monthlyInHand),
+        after: formatINR(resAfter.monthlyInHand),
+        change: `+${formatINR(diffMonthlyInhand)} (${realTakeHomeHikePct.toFixed(1)}%)`,
+        highlight: true,
+      },
+      {
+        name: 'Annual Take-Home In-Hand',
+        before: formatINR(resBefore.annualInHand),
+        after: formatINR(resAfter.annualInHand),
+        change: `+${formatINR(diffAnnualInhand)}`,
+        highlight: false,
+      },
+      {
+        name: 'Annual Income Tax (TDS)',
+        before: formatINR(resBefore.tax.totalTax),
+        after: formatINR(resAfter.tax.totalTax),
+        change: `+${formatINR(resAfter.tax.totalTax - resBefore.tax.totalTax)}`,
+        highlight: false,
+      },
+      {
+        name: 'Employee PF (Annual)',
+        before: formatINR(resBefore.employeePF),
+        after: formatINR(resAfter.employeePF),
+        change: `+${formatINR(resAfter.employeePF - resBefore.employeePF)}`,
+        highlight: false,
+      },
+    ];
+
+    hikeTableBody.innerHTML = tableRows
+      .map(
+        (r) => `
+        <tr ${r.highlight ? 'style="font-weight:600; background:rgba(5, 177, 105, 0.06);"' : ''}>
+          <td>${r.name}</td>
+          <td class="text-right">${r.before}</td>
+          <td class="text-right">${r.after}</td>
+          <td class="text-right ${r.highlight ? 'text-success' : ''}">${r.change}</td>
+        </tr>
+      `
+      )
+      .join('');
+  }
+
+  // Listeners
+  currentCtcInput.addEventListener('input', () => runHikeCalc('percent'));
+  hikePercentInput.addEventListener('input', () => runHikeCalc('percent'));
+  newCtcInput.addEventListener('input', () => runHikeCalc('newCtc'));
+  pfSelect.addEventListener('change', () => runHikeCalc('percent'));
+  calcBtn.addEventListener('click', () => runHikeCalc('percent'));
+
+  document.querySelectorAll('input[name="regime"]').forEach((el) => {
+    el.addEventListener('change', () => runHikeCalc('percent'));
+  });
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chips.forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const hikeVal = chip.getAttribute('data-hike');
+      if (hikeVal) {
+        hikePercentInput.value = hikeVal;
+        runHikeCalc('percent');
+      }
+    });
+  });
+
+  // Initial Run
+  runHikeCalc('percent');
+</script>

@@ -1,0 +1,153 @@
+---
+/**
+ * Official Statutory Sources & Legal Citations
+ * Direct links to official government publications, acts, and press releases.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Official Legal Sources & Statutory Citations';
+const description = 'Direct government citations for PayDecode: Income-tax Act 2025, EPFO ₹25,000 wage ceiling PIB release, and 8th Central Pay Commission portal.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/sources`,
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/sources"
+  jsonLd={jsonLd}
+>
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Sources & Citations</span>
+    </nav>
+  </div>
+
+  <div class="container pb-xxl">
+    <div class="max-content-text">
+      <div class="badge badge-accent mb-sm">Verification Registry</div>
+      <h1 class="display-sm mb-sm">Official Sources & Statutory Citations</h1>
+      <p class="body-md text-muted mb-xl">
+        Every formula, tax slab, deduction cap, and statutory rule in PayDecode is linked to primary official government gazettes and notifications.
+      </p>
+
+      <div class="sources-list">
+        <!-- 1. Income-tax Act, 2025 -->
+        <div class="card source-card mb-md">
+          <div class="source-header">
+            <span class="badge badge-primary">Taxation</span>
+            <span class="caption text-muted">Effective: 1 April 2026 • Verified: 17 Oct 2026</span>
+          </div>
+          <h2 class="title-sm mb-xs">Income-tax Act, 2025</h2>
+          <p class="body-sm text-body mb-sm">
+            Enacted to replace the Income-tax Act, 1961. Governs individual tax rates, standard deduction under Section 19, tax slabs under Section 202, and marginal relief under Section 156.
+          </p>
+          <div class="source-links">
+            <a href="https://www.incometaxindia.gov.in/en/income-tax-act-202511" target="_blank" rel="noopener noreferrer" class="source-link">
+              Income Tax Department Official Act Portal ↗
+            </a>
+            <a href="https://www.incometaxindia.gov.in/Documents/income-tax-bill-2025/new-bill-2025-navigator.pdf" target="_blank" rel="noopener noreferrer" class="source-link">
+              Official Section Navigator & Transition Guide (PDF) ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. EPFO Wage Ceiling Increase -->
+        <div class="card source-card mb-md">
+          <div class="source-header">
+            <span class="badge badge-primary">Provident Fund</span>
+            <span class="caption text-muted">Effective: 17 September 2026 • Verified: 17 Oct 2026</span>
+          </div>
+          <h2 class="title-sm mb-xs">EPFO Statutory Wage Ceiling Increase (₹25,000/mo)</h2>
+          <p class="body-sm text-body mb-sm">
+            Press Information Bureau (PIB) and Ministry of Labour & Employment notification increasing the statutory wage ceiling from ₹15,000 to ₹25,000 per month. Both employer and employee statutory PF contributions are now ₹3,000/month.
+          </p>
+          <div class="source-links">
+            <a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2310973&lang=2&reg=48" target="_blank" rel="noopener noreferrer" class="source-link">
+              PIB Official Press Release #2310973 ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. Payment of Gratuity Act, 1972 -->
+        <div class="card source-card mb-md">
+          <div class="source-header">
+            <span class="badge badge-primary">Labour Law</span>
+            <span class="caption text-muted">India Code • Verified: 17 Oct 2026</span>
+          </div>
+          <h2 class="title-sm mb-xs">Payment of Gratuity Act, 1972 (as amended)</h2>
+          <p class="body-sm text-body mb-sm">
+            Section 4 specifies the 15/26 working day formula and mandatory 5-year continuous service eligibility rule. Section 10(10) of the Income-tax Act establishes the ₹20,00,000 lifetime tax-exemption cap.
+          </p>
+          <div class="source-links">
+            <a href="https://www.indiacode.nic.in/handle/123456789/1529" target="_blank" rel="noopener noreferrer" class="source-link">
+              India Code Digital Repository ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- 4. 8th Central Pay Commission -->
+        <div class="card source-card mb-md">
+          <div class="source-header">
+            <span class="badge badge-primary">Central Government</span>
+            <span class="caption text-muted">Ministry of Finance • Verified: 17 Oct 2026</span>
+          </div>
+          <h2 class="title-sm mb-xs">8th Central Pay Commission (8CPC)</h2>
+          <p class="body-sm text-body mb-sm">
+            Official Commission website for terms of reference, staff representations, gazette notifications, and announcements regarding fitment factors and pay matrices.
+          </p>
+          <div class="source-links">
+            <a href="https://8cpc.gov.in/" target="_blank" rel="noopener noreferrer" class="source-link">
+              Official 8th Central Pay Commission Portal (8cpc.gov.in) ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .max-content-text {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .source-card {
+    border-left: 4px solid var(--color-primary);
+  }
+
+  .source-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .source-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+  }
+
+  .source-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  .source-link:hover {
+    color: var(--color-primary-hover);
+  }
+</style>

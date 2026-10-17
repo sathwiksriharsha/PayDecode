@@ -1,0 +1,661 @@
+---
+/**
+ * New vs Old Tax Regime Calculator (Tax Year 2026–27)
+ * Side-by-side tax comparison, deduction breakeven analyzer, and regime decider.
+ * Income-tax Act, 2025 compliant (Section 202 vs Legacy Old Regime).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'New vs Old Tax Regime Calculator 2026–27 | Which Regime Saves More Tax?';
+const description = 'Compare New vs Old Tax Regime for Tax Year 2026–27 under the Income-tax Act, 2025. Calculate your breakeven deductions, HRA, 80C, 80D, and find which tax regime saves you more money.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/new-vs-old-tax-regime-calculator`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: 'New vs Old Tax Regime Calculator', item: `${site.url}/new-vs-old-tax-regime-calculator` },
+  ],
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Is the New Tax Regime better than the Old Tax Regime for Tax Year 2026–27?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'For most salaried employees, the New Tax Regime (Section 202 of Income-tax Act, 2025) is substantially better due to lower slab rates, a higher standard deduction of ₹75,000, and a full tax rebate for taxable income up to ₹12 Lakh. The Old Regime is usually only beneficial if you have very high deductions exceeding ₹3.75 Lakh to ₹4.25 Lakh (such as high HRA exemption, Section 80C ₹1.5L, Section 80D, and home loan interest).',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the standard deduction in New vs Old Regime for 2026–27?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Under Section 19 of the Income-tax Act, 2025, the standard deduction for salaried individuals is ₹75,000 under the New Tax Regime and ₹50,000 under the Old Tax Regime.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the tax rebate threshold for 2026–27?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Under Section 156 of the Income-tax Act, 2025 (legacy Section 87A), resident individuals under the New Regime pay zero income tax if their taxable income is up to ₹12,00,000 (meaning gross salary up to ₹12.75 Lakh with the standard deduction has zero tax liability). Under the Old Regime, the rebate threshold is ₹5,00,000.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/new-vs-old-tax-regime-calculator"
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>New vs Old Tax Regime Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Input Panel ═══ -->
+      <div class="calc-inputs">
+        <div class="card">
+          <div class="badge badge-accent mb-sm">Tax Regime Decider</div>
+          <h1 class="display-sm mb-xs">New vs Old Tax Regime</h1>
+          <p class="body-sm text-muted mb-xl">
+            Tax Year 2026–27 • Income-tax Act, 2025. Compare your tax liability and see exactly which regime saves you more money.
+          </p>
+
+          <!-- Annual Gross Salary -->
+          <div class="input-group">
+            <label for="regime-gross-input" class="input-label">
+              Annual Gross Salary
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">Your gross annual salary (basic + HRA + special allowance + bonuses) before any tax or PF deductions.</span>
+              </span>
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="text"
+                id="regime-gross-input"
+                class="input input-number"
+                placeholder="e.g. 15,00,000"
+                value="1500000"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="regime-basic-input" class="input-label">Annual Basic Salary (for HRA & PF)</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="text"
+                id="regime-basic-input"
+                class="input input-number"
+                placeholder="e.g. 6,00,000"
+                value="600000"
+              />
+            </div>
+          </div>
+
+          <!-- Section: Old Regime Deductions -->
+          <div class="border-top pt-md mt-md">
+            <div class="d-flex justify-between items-center mb-sm">
+              <span class="title-sm">Old Regime Exemptions & Deductions</span>
+              <span class="caption text-muted">Applied to Old Regime only</span>
+            </div>
+
+            <!-- HRA -->
+            <div class="input-group">
+              <label for="regime-rent-paid" class="input-label">Annual Rent Paid (for HRA exemption)</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="text" id="regime-rent-paid" class="input input-number" placeholder="0" value="180000" />
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="regime-is-metro" checked />
+                Rented home is in a Metro City (Delhi, Mumbai, Kolkata, Chennai)
+              </label>
+            </div>
+
+            <!-- 80C -->
+            <div class="input-group">
+              <label for="regime-80c" class="input-label">Section 80C (PPF, ELSS, EPF, LIC — max ₹1.5L)</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="text" id="regime-80c" class="input input-number" placeholder="150000" value="150000" />
+              </div>
+            </div>
+
+            <!-- 80D -->
+            <div class="input-group">
+              <label for="regime-80d-self" class="input-label">Section 80D (Health Insurance: Self/Family — max ₹25k)</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="text" id="regime-80d-self" class="input input-number" placeholder="0" value="25000" />
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="regime-80d-parents" class="input-label">Section 80D (Parents — max ₹25k, or ₹50k for senior)</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="text" id="regime-80d-parents" class="input input-number" placeholder="0" value="25000" />
+              </div>
+            </div>
+
+            <!-- Home Loan Interest -->
+            <div class="input-group">
+              <label for="regime-home-loan" class="input-label">Home Loan Interest (Self-Occupied — max ₹2L)</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="text" id="regime-home-loan" class="input input-number" placeholder="0" value="0" />
+              </div>
+            </div>
+
+            <!-- NPS 80CCD(1B) -->
+            <div class="input-group">
+              <label for="regime-80ccd1b" class="input-label">NPS Voluntary Contribution 80CCD(1B) (max ₹50k)</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="text" id="regime-80ccd1b" class="input input-number" placeholder="0" value="0" />
+              </div>
+            </div>
+          </div>
+
+          <button id="compare-regimes-btn" class="btn btn-primary btn-block mt-lg">
+            Compare Tax Regimes
+          </button>
+        </div>
+
+        <!-- Ad Slot -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-regime-1">
+            <div class="ad-placeholder">
+              <span>Section 80C ELSS Mutual Funds & Tax Saving Instruments</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Right: Result Panel ═══ -->
+      <div class="calc-results">
+        <!-- Verdict Card -->
+        <div class="card card-hero-result" id="regime-verdict-card">
+          <div class="hero-result-header">
+            <span class="hero-result-label">Recommended Choice</span>
+            <span class="badge badge-success" id="verdict-badge">New Regime Wins</span>
+          </div>
+
+          <div class="hero-result-amount text-success" id="verdict-amount">Saves ₹26,520</div>
+          <div class="hero-result-sub" id="verdict-sub">
+            The New Tax Regime provides lower tax liability for your income and claimed deductions.
+          </div>
+
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">New Regime Tax</span>
+              <span class="stat-val text-success" id="res-new-tax">₹93,600</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Old Regime Tax</span>
+              <span class="stat-val text-danger" id="res-old-tax">₹1,20,120</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Standard Deduction</span>
+              <span class="stat-val">₹75,000 vs ₹50,000</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Breakeven Deductions</span>
+              <span class="stat-val" id="res-breakeven">₹4,12,500</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Breakeven Analysis Box -->
+        <div class="card mt-lg bg-soft">
+          <h3 class="title-sm mb-xs">Deduction Breakeven Analysis</h3>
+          <p class="body-sm text-body mb-sm" id="breakeven-explainer">
+            At a gross salary of ₹15 Lakh, you need at least <strong>₹4,12,500</strong> in total Old Regime deductions (including 80C, 80D, and HRA) before the Old Regime becomes more beneficial than the New Regime.
+          </p>
+          <div class="caption text-muted">
+            Currently claimed eligible deductions: <span class="font-bold text-ink" id="claimed-deductions-total">₹3,50,000</span>.
+          </div>
+        </div>
+
+        <!-- Detailed Side-by-Side Table -->
+        <div class="card mt-lg">
+          <h2 class="title-sm mb-md">Comprehensive Line-by-Line Tax Comparison</h2>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th class="text-right">New Regime (Sec 202)</th>
+                  <th class="text-right">Old Regime</th>
+                  <th class="text-right">Difference</th>
+                </tr>
+              </thead>
+              <tbody id="regime-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ad Slot 2 -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-regime-2">
+            <div class="ad-placeholder">
+              <span>Health Insurance & Term Life Plans with Tax Benefits</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══ SEO Educational Article ═══ -->
+    <section class="seo-guide mt-xxl pt-xl border-top">
+      <div class="max-content-text">
+        <h2 class="display-sm mb-md">New vs Old Tax Regime in Tax Year 2026–27</h2>
+        <p class="body-md text-body mb-lg">
+          With the enactment of the <strong>Income-tax Act, 2025</strong> (effective 1 April 2026), the New Tax Regime is the default regime for all Indian taxpayers under Section 202. The government has made the New Regime compelling for middle-class salaried employees with expanded slabs, a ₹75,000 standard deduction under Section 19, and full tax rebate on taxable income up to ₹12 Lakh under Section 156.
+        </p>
+
+        <h3 class="title-lg mb-sm">Slab Comparison for 2026–27</h3>
+        <div class="table-container mb-lg">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Income Band</th>
+                <th>New Regime Rate</th>
+                <th>Old Regime Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Up to ₹2,50,000</td><td>0%</td><td>0%</td></tr>
+              <tr><td>₹2,50,001 – ₹4,00,000</td><td>0%</td><td>5%</td></tr>
+              <tr><td>₹4,00,001 – ₹5,00,000</td><td>5%</td><td>5%</td></tr>
+              <tr><td>₹5,00,001 – ₹8,00,000</td><td>5%</td><td>20%</td></tr>
+              <tr><td>₹8,00,001 – ₹10,00,000</td><td>10%</td><td>20%</td></tr>
+              <tr><td>₹10,00,001 – ₹12,00,000</td><td>10%</td><td>30%</td></tr>
+              <tr><td>₹12,00,001 – ₹16,00,000</td><td>15%</td><td>30%</td></tr>
+              <tr><td>₹16,00,001 – ₹20,00,000</td><td>20%</td><td>30%</td></tr>
+              <tr><td>₹20,00,001 – ₹24,00,000</td><td>25%</td><td>30%</td></tr>
+              <tr><td>Above ₹24,00,000</td><td>30%</td><td>30%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title-lg mb-sm">When Should You Choose the Old Regime?</h3>
+        <p class="body-md text-body mb-base">
+          You should only opt for the Old Regime if you can claim substantial deductions that bring your Old Regime tax below the New Regime tax. Typically, this requires:
+        </p>
+        <ul class="seo-list mb-lg">
+          <li><strong>High HRA Exemption:</strong> Paying ₹30,000 to ₹50,000+ monthly rent in metros like Mumbai, Bengaluru, or Delhi NCR.</li>
+          <li><strong>Full ₹1.5 Lakh under 80C:</strong> EPF, PPF, ELSS mutual funds, or home loan principal repayment.</li>
+          <li><strong>Home Loan Interest:</strong> Up to ₹2 Lakh deduction under Section 24(b).</li>
+          <li><strong>Health Insurance under 80D:</strong> Up to ₹25,000 for self/family plus up to ₹50,000 for senior citizen parents.</li>
+          <li><strong>NPS 80CCD(1B):</strong> Additional voluntary contribution of ₹50,000.</li>
+        </ul>
+
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 460px 1fr;
+    }
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+
+  .font-bold { font-weight: 700; }
+  .text-ink { color: var(--color-ink); }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-content-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+</style>
+
+<script>
+  import { calculateIncomeTax } from '../utils/taxEngine';
+  import { parseSalaryInput, formatINR } from '../utils/formatCurrency';
+
+  // Inputs
+  const grossInput = document.getElementById('regime-gross-input') as HTMLInputElement;
+  const basicInput = document.getElementById('regime-basic-input') as HTMLInputElement;
+  const rentInput = document.getElementById('regime-rent-paid') as HTMLInputElement;
+  const isMetroCheckbox = document.getElementById('regime-is-metro') as HTMLInputElement;
+  const c80Input = document.getElementById('regime-80c') as HTMLInputElement;
+  const d80SelfInput = document.getElementById('regime-80d-self') as HTMLInputElement;
+  const d80ParentsInput = document.getElementById('regime-80d-parents') as HTMLInputElement;
+  const homeLoanInput = document.getElementById('regime-home-loan') as HTMLInputElement;
+  const ccdInput = document.getElementById('regime-80ccd1b') as HTMLInputElement;
+  const compareBtn = document.getElementById('compare-regimes-btn') as HTMLButtonElement;
+
+  // Outputs
+  const verdictBadge = document.getElementById('verdict-badge')!;
+  const verdictAmount = document.getElementById('verdict-amount')!;
+  const verdictSub = document.getElementById('verdict-sub')!;
+  const resNewTax = document.getElementById('res-new-tax')!;
+  const resOldTax = document.getElementById('res-old-tax')!;
+  const resBreakeven = document.getElementById('res-breakeven')!;
+  const claimedDeductionsTotal = document.getElementById('claimed-deductions-total')!;
+  const breakevenExplainer = document.getElementById('breakeven-explainer')!;
+  const regimeTableBody = document.getElementById('regime-table-body')!;
+
+  function compareRegimes() {
+    const gross = parseSalaryInput(grossInput.value);
+    const basic = parseSalaryInput(basicInput.value) || Math.round(gross * 0.4);
+    if (!gross || gross <= 0) return;
+
+    const rentPaid = parseSalaryInput(rentInput.value) || 0;
+    const isMetro = isMetroCheckbox.checked;
+    const d80C = parseSalaryInput(c80Input.value) || 0;
+    const d80DSelf = parseSalaryInput(d80SelfInput.value) || 0;
+    const d80DParents = parseSalaryInput(d80ParentsInput.value) || 0;
+    const homeLoan = parseSalaryInput(homeLoanInput.value) || 0;
+    const ccd1B = parseSalaryInput(ccdInput.value) || 0;
+
+    // 1. Calculate New Regime Tax
+    const taxNew = calculateIncomeTax({
+      annualGrossSalary: gross,
+      regime: 'new',
+      annualBasicSalary: basic,
+    });
+
+    // 2. Calculate Old Regime Tax with all user deductions
+    const taxOld = calculateIncomeTax({
+      annualGrossSalary: gross,
+      regime: 'old',
+      annualBasicSalary: basic,
+      rentPaid,
+      isMetro,
+      deduction80C: d80C,
+      deduction80D_self: d80DSelf,
+      deduction80D_parents: d80DParents,
+      homeLoanInterest: homeLoan,
+      deduction80CCD1B: ccd1B,
+    });
+
+    // 3. Breakeven deduction search: Find what total deduction makes Old Tax equal to New Tax
+    let breakevenDeductions = 0;
+    for (let testDeduction = 50000; testDeduction <= 1500000; testDeduction += 5000) {
+      const testOld = calculateIncomeTax({
+        annualGrossSalary: gross,
+        regime: 'old',
+        annualBasicSalary: basic,
+        deduction80C: Math.min(150000, testDeduction),
+        homeLoanInterest: Math.min(200000, Math.max(0, testDeduction - 150000)),
+        deduction80D_self: Math.min(25000, Math.max(0, testDeduction - 350000)),
+        deduction80CCD1B: Math.min(50000, Math.max(0, testDeduction - 375000)),
+      });
+      if (testOld.totalTax <= taxNew.totalTax) {
+        breakevenDeductions = testDeduction;
+        break;
+      }
+    }
+
+    const totalClaimed = taxOld.chapterVIADeductions + taxOld.hraExemption + taxOld.homeLoanDeduction;
+    claimedDeductionsTotal.textContent = formatINR(totalClaimed);
+
+    resNewTax.textContent = formatINR(taxNew.totalTax);
+    resOldTax.textContent = formatINR(taxOld.totalTax);
+    resBreakeven.textContent = breakevenDeductions > 0 ? formatINR(breakevenDeductions) : 'N/A';
+
+    const diff = Math.abs(taxNew.totalTax - taxOld.totalTax);
+
+    if (taxNew.totalTax < taxOld.totalTax) {
+      verdictBadge.textContent = 'New Regime Wins';
+      verdictBadge.className = 'badge badge-success';
+      verdictAmount.textContent = `Saves ${formatINR(diff)}`;
+      verdictAmount.className = 'hero-result-amount text-success';
+      verdictSub.textContent = `The New Tax Regime saves you ${formatINR(diff)} in annual income tax compared to the Old Regime.`;
+    } else if (taxOld.totalTax < taxNew.totalTax) {
+      verdictBadge.textContent = 'Old Regime Wins';
+      verdictBadge.className = 'badge badge-accent';
+      verdictAmount.textContent = `Saves ${formatINR(diff)}`;
+      verdictAmount.className = 'hero-result-amount text-success';
+      verdictSub.textContent = `Thanks to your high deductions, the Old Regime saves you ${formatINR(diff)} in annual income tax.`;
+    } else {
+      verdictBadge.textContent = 'Both Regimes Equal';
+      verdictBadge.className = 'badge';
+      verdictAmount.textContent = 'Equal Tax';
+      verdictAmount.className = 'hero-result-amount';
+      verdictSub.textContent = `Both tax regimes yield the exact same tax liability of ${formatINR(taxNew.totalTax)}.`;
+    }
+
+    breakevenExplainer.innerHTML = `At a gross salary of ${formatINR(gross)}, you need at least <strong>${formatINR(breakevenDeductions)}</strong> in total Old Regime deductions (including HRA, 80C, 80D, and Home Loan) before the Old Regime becomes cheaper than the New Regime.`;
+
+    // Table rows
+    const rows = [
+      {
+        item: 'Gross Salary',
+        valNew: formatINR(taxNew.grossSalary),
+        valOld: formatINR(taxOld.grossSalary),
+        diff: '₹0',
+      },
+      {
+        item: 'Standard Deduction (Sec 19)',
+        valNew: formatINR(taxNew.standardDeduction),
+        valOld: formatINR(taxOld.standardDeduction),
+        diff: `+${formatINR(taxNew.standardDeduction - taxOld.standardDeduction)} (New Regime)`,
+      },
+      {
+        item: 'HRA Exemption',
+        valNew: 'Not Allowed',
+        valOld: formatINR(taxOld.hraExemption),
+        diff: formatINR(taxOld.hraExemption),
+      },
+      {
+        item: 'Chapter VI-A Deductions (80C, 80D, etc.)',
+        valNew: 'Not Allowed',
+        valOld: formatINR(taxOld.chapterVIADeductions),
+        diff: formatINR(taxOld.chapterVIADeductions),
+      },
+      {
+        item: 'Home Loan Interest (Sec 24b)',
+        valNew: 'Not Allowed',
+        valOld: formatINR(taxOld.homeLoanDeduction),
+        diff: formatINR(taxOld.homeLoanDeduction),
+      },
+      {
+        item: 'Taxable Income',
+        valNew: formatINR(taxNew.taxableIncome),
+        valOld: formatINR(taxOld.taxableIncome),
+        diff: formatINR(Math.abs(taxNew.taxableIncome - taxOld.taxableIncome)),
+      },
+      {
+        item: 'Slab Tax Before Rebate',
+        valNew: formatINR(taxNew.slabTax),
+        valOld: formatINR(taxOld.slabTax),
+        diff: formatINR(Math.abs(taxNew.slabTax - taxOld.slabTax)),
+      },
+      {
+        item: 'Tax Rebate (Sec 156 / legacy 87A)',
+        valNew: formatINR(taxNew.rebate),
+        valOld: formatINR(taxOld.rebate),
+        diff: formatINR(Math.abs(taxNew.rebate - taxOld.rebate)),
+      },
+      {
+        item: 'Health & Education Cess (4%)',
+        valNew: formatINR(taxNew.cess),
+        valOld: formatINR(taxOld.cess),
+        diff: formatINR(Math.abs(taxNew.cess - taxOld.cess)),
+      },
+      {
+        item: 'Total Annual Tax Payable',
+        valNew: formatINR(taxNew.totalTax),
+        valOld: formatINR(taxOld.totalTax),
+        diff: `${formatINR(diff)} (${taxNew.totalTax <= taxOld.totalTax ? 'New' : 'Old'} Regime Saves)`,
+        highlight: true,
+      },
+    ];
+
+    regimeTableBody.innerHTML = rows
+      .map(
+        (r) => `
+        <tr ${r.highlight ? 'style="font-weight:700; background:rgba(5, 177, 105, 0.08);"' : ''}>
+          <td>${r.item}</td>
+          <td class="text-right font-mono">${r.valNew}</td>
+          <td class="text-right font-mono">${r.valOld}</td>
+          <td class="text-right ${r.highlight ? 'text-success' : 'text-muted'}">${r.diff}</td>
+        </tr>
+      `
+      )
+      .join('');
+  }
+
+  // Listeners
+  [grossInput, basicInput, rentInput, c80Input, d80SelfInput, d80ParentsInput, homeLoanInput, ccdInput].forEach((el) => {
+    el.addEventListener('input', compareRegimes);
+  });
+  isMetroCheckbox.addEventListener('change', compareRegimes);
+  compareBtn.addEventListener('click', compareRegimes);
+
+  // Initial Run
+  compareRegimes();
+</script>

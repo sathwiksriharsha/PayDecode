@@ -1,0 +1,212 @@
+---
+/**
+ * Base layout for all PayDecode pages.
+ * Handles meta tags, OG, JSON-LD, canonical, and the global shell (nav + footer).
+ */
+import { site } from "../config/site";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description,
+  canonicalPath = "",
+  ogImage = site.ogImage,
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const canonicalURL = new URL(canonicalPath, site.url).href;
+const ogImageURL = new URL(ogImage, site.url).href;
+const fullTitle =
+  canonicalPath === "/" || canonicalPath === ""
+    ? `${site.name} — ${site.tagline}`
+    : `${title} | ${site.name}`;
+---
+
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content={site.themeColor} />
+
+    <!-- SEO -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:locale" content={site.locale} />
+    <meta property="og:site_name" content={site.name} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- JSON-LD -->
+    {
+      jsonLd && (
+        <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+      )
+    }
+
+    <!-- Preconnect for Google Fonts performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand" aria-label={`${site.name} home`}>
+          <span class="nav-brand-icon">₹</span>
+          {site.name}
+        </a>
+
+        <button
+          class="nav-mobile-toggle"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          id="nav-toggle"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <ul class="nav-links" id="nav-links">
+          <li><a href="/ctc-to-inhand-calculator">CTC Calculator</a></li>
+          <li><a href="/inhand-to-ctc-calculator">Reverse Calculator</a></li>
+          <li><a href="/offer-comparison-calculator">Compare Offers</a></li>
+          <li><a href="/new-vs-old-tax-regime-calculator">Tax Regime</a></li>
+          <li><a href="/salary-hike-calculator">Hike Calculator</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <!-- Big PayDecode Brand Header -->
+        <div class="footer-hero-brand">
+          <div class="footer-brand-title-wrap">
+            <span class="footer-brand-heading">PayDecode</span>
+          </div>
+          <p class="footer-brand-strapline">
+            Decode Your Salary. Know Your Real Take-Home.
+          </p>
+        </div>
+
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h4>Calculators</h4>
+            <a href="/ctc-to-inhand-calculator">CTC to In-Hand</a>
+            <a href="/inhand-to-ctc-calculator">In-Hand to CTC</a>
+            <a href="/salary-hike-calculator">Salary Hike</a>
+            <a href="/offer-comparison-calculator">Offer Comparison</a>
+            <a href="/new-vs-old-tax-regime-calculator">Tax Regime</a>
+            <a href="/hra-exemption-calculator">HRA Exemption</a>
+            <a href="/gratuity-calculator">Gratuity</a>
+            <a href="/8th-pay-commission-calculator">8th Pay Commission</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company Salaries</h4>
+            <a href="/company/tcs-ninja">TCS Ninja (3.36 LPA)</a>
+            <a href="/company/tcs-digital">TCS Digital (7.0 LPA)</a>
+            <a href="/company/tcs-prime">TCS Prime (9.0 LPA)</a>
+            <a href="/company/infosys-se">Infosys SE (3.6 LPA)</a>
+            <a href="/company/infosys-sp">Infosys SP (9.5 LPA)</a>
+            <a href="/company/wipro-turbo">Wipro Turbo (6.5 LPA)</a>
+            <a href="/company/accenture-ase">Accenture ASE (4.5 LPA)</a>
+            <a href="/company/cognizant-genc">Cognizant GenC (4.0 LPA)</a>
+          </div>
+          <div class="footer-col">
+            <h4>Government Pay</h4>
+            <a href="/govt-salary/7th-cpc-pay-level-1">7th CPC Level 1 (MTS)</a>
+            <a href="/govt-salary/7th-cpc-pay-level-7"
+              >7th CPC Level 7 (ASO/Inspector)</a
+            >
+            <a href="/govt-salary/7th-cpc-pay-level-10"
+              >7th CPC Level 10 (Group A)</a
+            >
+            <a href="/govt-salary/8th-cpc-fitment-scenario-level-1"
+              >8th CPC Level 1 Scenario</a
+            >
+            <a href="/govt-salary/8th-cpc-fitment-scenario-level-7"
+              >8th CPC Level 7 Scenario</a
+            >
+            <a href="/govt-salary/8th-cpc-fitment-scenario-level-10"
+              >8th CPC Level 10 Scenario</a
+            >
+          </div>
+          <div class="footer-col">
+            <h4>Resources & Legal</h4>
+            <a href="/methodology">Methodology</a>
+            <a href="/tax-rules">Tax Rules 2026–27</a>
+            <a href="/sources">Official Sources</a>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Use</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+          </div>
+        </div>
+
+        <div class="footer-legal">
+          <p>
+            © {new Date().getFullYear()}
+            {site.name}. All estimates are based on displayed assumptions and
+            <a href="/sources">linked official sources</a>. Not personal tax or
+            financial advice. Rules last reviewed: 17 October 2026.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile nav toggle script -->
+    <script>
+      const toggle = document.getElementById("nav-toggle");
+      const links = document.getElementById("nav-links");
+      if (toggle && links) {
+        toggle.addEventListener("click", () => {
+          const expanded = toggle.getAttribute("aria-expanded") === "true";
+          toggle.setAttribute("aria-expanded", String(!expanded));
+          links.classList.toggle("open");
+        });
+      }
+    </script>
+  </body>
+</html>

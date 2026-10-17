@@ -1,0 +1,734 @@
+---
+/**
+ * In-Hand to CTC Calculator (Reverse Salary Calculator)
+ * Reverse solves for the required CTC to achieve a target monthly in-hand credit.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+import { PROFESSIONAL_TAX } from '../config/statutoryRules';
+
+const title = 'In-Hand to CTC Calculator 2026–27 | Reverse Salary Calculator';
+const description = 'Reverse calculate the annual CTC required for your target monthly take-home salary in India. Supports New Tax Regime (Income-tax Act, 2025) and updated ₹25,000 PF wage ceiling.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}/inhand-to-ctc-calculator`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: 'In-Hand to CTC Calculator', item: `${site.url}/inhand-to-ctc-calculator` },
+  ],
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'How much CTC is required for ₹1,00,000 monthly in-hand salary?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Under the New Tax Regime (Tax Year 2026–27) with the standard ₹25,000 PF wage ceiling and Maharashtra professional tax, you need an annual CTC of approximately ₹13.8 Lakh to ₹14.2 Lakh to take home ₹1,00,000 per month, assuming zero variable pay.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Why is CTC higher than annual take-home salary?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'CTC (Cost to Company) contains employer contributions such as Employer Provident Fund (12%), Gratuity provision (approx 4.81% of basic), employer health insurance, and variable pay. Additionally, Income Tax (TDS), Employee PF, and Professional Tax are deducted before the money reaches your bank account.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How does the new ₹25,000 PF ceiling affect the reverse CTC calculation?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Effective 17 September 2026, the statutory EPFO wage ceiling is ₹25,000 per month (up from ₹15,000). Both employee and employer PF contributions are ₹3,000/month (total ₹6,000/month). This increases total PF savings and slightly increases the gross CTC needed for a given net take-home.',
+      },
+    },
+  ],
+};
+
+const ptStates = Object.entries(PROFESSIONAL_TAX);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/inhand-to-ctc-calculator"
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>In-Hand to CTC Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Input Panel ═══ -->
+      <div class="calc-inputs">
+        <div class="card">
+          <div class="badge badge-accent mb-sm">Reverse Salary Solver</div>
+          <h1 class="display-sm mb-xs">In-Hand to CTC Calculator</h1>
+          <p class="body-sm text-muted mb-xl">
+            Want a specific monthly bank credit? Enter your target in-hand salary and see the exact annual CTC you need to negotiate.
+          </p>
+
+          <!-- Target In-Hand Input -->
+          <div class="input-group">
+            <label for="target-inhand-input" class="input-label">
+              Desired Monthly In-Hand Salary
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">The net amount you want credited to your bank account on payday every month.</span>
+              </span>
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="text"
+                id="target-inhand-input"
+                class="input input-number"
+                placeholder="e.g. 1,00,000 or 1L"
+                inputmode="decimal"
+                autocomplete="off"
+                value="100000"
+              />
+            </div>
+            <!-- Quick preset chips -->
+            <div class="quick-chips mt-xs">
+              <button type="button" class="chip-btn" data-val="50000">₹50K</button>
+              <button type="button" class="chip-btn" data-val="75000">₹75K</button>
+              <button type="button" class="chip-btn active" data-val="100000">₹1 Lakh</button>
+              <button type="button" class="chip-btn" data-val="150000">₹1.5 Lakh</button>
+              <button type="button" class="chip-btn" data-val="200000">₹2 Lakh</button>
+            </div>
+          </div>
+
+          <!-- Basic % -->
+          <div class="input-group">
+            <label class="input-label">
+              Expected Basic Salary (% of CTC)
+            </label>
+            <div class="radio-group">
+              <label class="radio-pill">
+                <input type="radio" name="basic-percent" value="40" checked /> 40% (Standard)
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="basic-percent" value="50" /> 50%
+              </label>
+            </div>
+          </div>
+
+          <!-- Tax Regime -->
+          <div class="input-group">
+            <label class="input-label">
+              Tax Regime
+              <span class="badge badge-accent ml-xs">2026–27</span>
+            </label>
+            <div class="radio-group">
+              <label class="radio-pill">
+                <input type="radio" name="regime" value="new" checked /> New Regime (Default)
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="regime" value="old" /> Old Regime
+              </label>
+            </div>
+          </div>
+
+          <!-- PF Policy -->
+          <div class="input-group">
+            <label for="pf-policy" class="input-label">
+              PF Policy
+              <span class="tooltip-trigger">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">Statutory ceiling is ₹25,000/mo (₹3,000 PF) effective 17 Sep 2026. Many MNCs and tech startups deduct PF on full basic salary.</span>
+              </span>
+            </label>
+            <select id="pf-policy" class="input">
+              <option value="statutory_ceiling" selected>Statutory Ceiling (₹25,000/month cap)</option>
+              <option value="full_basic">Full Basic (12% of entire basic)</option>
+            </select>
+          </div>
+
+          <!-- Professional Tax State -->
+          <div class="input-group">
+            <label for="pt-state" class="input-label">Work Location (Professional Tax)</label>
+            <select id="pt-state" class="input">
+              {ptStates.map(([key, val]) => (
+                <option value={key} selected={key === 'maharashtra'}>
+                  {val.state} ({val.annualMax > 0 ? `₹${val.annualMax}/yr` : 'Nil'})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <!-- Gratuity Included? -->
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="include-gratuity" checked />
+              Include Gratuity in CTC (approx 4.81% of basic)
+            </label>
+          </div>
+
+          <button id="calculate-btn" class="btn btn-primary btn-block mt-lg">
+            Calculate Required CTC
+          </button>
+        </div>
+
+        <!-- Ad Slot: Compliant responsive ad container -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-reverse-1">
+            <!-- Google AdSense ad unit code goes here -->
+            <div class="ad-placeholder">
+              <span>Sponsored Financial Services & Tax Planning Tools</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Right: Result Panel ═══ -->
+      <div class="calc-results">
+        <!-- Target In-Hand Card -->
+        <div class="card card-hero-result" id="result-card">
+          <div class="hero-result-header">
+            <span class="hero-result-label">Required Annual CTC</span>
+            <span class="badge badge-success">Optimized Solution</span>
+          </div>
+          <div class="hero-result-amount" id="res-required-ctc">₹13,92,400</div>
+          <div class="hero-result-sub" id="res-ctc-words">approx Thirteen Lakh Ninety-Two Thousand Rupees</div>
+
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly In-Hand</span>
+              <span class="stat-val text-success" id="res-monthly-inhand">₹1,00,000</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly Gross</span>
+              <span class="stat-val" id="res-monthly-gross">₹1,11,867</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Annual Income Tax</span>
+              <span class="stat-val text-danger" id="res-annual-tax">₹89,200</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Monthly TDS</span>
+              <span class="stat-val text-danger" id="res-monthly-tds">₹7,433</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTC vs Take-Home Decomposition -->
+        <div class="card mt-lg">
+          <h2 class="title-sm mb-md">Where Does Your Required CTC Go?</h2>
+
+          <div class="salary-bar mb-md" id="decomposition-bar">
+            <div class="salary-bar-segment" id="bar-inhand" style="width: 71%; background: #05b169;" title="In-Hand Take Home"></div>
+            <div class="salary-bar-segment" id="bar-tax" style="width: 8%; background: #cf202f;" title="Income Tax (TDS)"></div>
+            <div class="salary-bar-segment" id="bar-pf" style="width: 14%; background: #0052ff;" title="Provident Fund (Employee + Employer)"></div>
+            <div class="salary-bar-segment" id="bar-other" style="width: 7%; background: #7c828a;" title="Gratuity & PT"></div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th class="text-right">Monthly</th>
+                  <th class="text-right">Annual</th>
+                  <th class="text-right">% of CTC</th>
+                </tr>
+              </thead>
+              <tbody id="breakdown-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Assumptions & Source Box -->
+        <div class="card mt-lg bg-soft">
+          <h3 class="title-sm mb-xs">Calculation Assumptions & Sourced Rules</h3>
+          <ul class="assumptions-list" id="assumptions-list">
+            <!-- Dynamically populated -->
+          </ul>
+          <p class="caption text-muted mt-md">
+            Computed using exact binary search convergence over the forward payroll model. Based on Income-tax Act, 2025 and EPFO circular dated 17 September 2026.
+          </p>
+        </div>
+
+        <!-- Ad Slot 2: Mid-content responsive ad -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-reverse-2">
+            <div class="ad-placeholder">
+              <span>Salary Benchmark Reports & Career Opportunities</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══ Comprehensive SEO Educational Guide ═══ -->
+    <section class="seo-guide mt-xxl pt-xl border-top">
+      <div class="max-content-text">
+        <h2 class="display-sm mb-md">How to Calculate CTC from Desired In-Hand Salary</h2>
+        <p class="body-md text-body mb-lg">
+          When interviewing for a new job or negotiating an annual appraisal in India, salary discussions usually center on <strong>Annual CTC (Cost to Company)</strong>. However, your monthly living expenses, rent, EMIs, and savings depend entirely on the <strong>net monthly in-hand credit</strong> in your bank account.
+        </p>
+
+        <h3 class="title-lg mb-sm">The Reverse Salary Formula</h3>
+        <p class="body-md text-body mb-base">
+          Because Indian taxation follows progressive income tax slabs with marginal relief and standard deductions, there is no simple multiplier (such as multiplying take-home by 1.2) that works accurately across different income levels.
+        </p>
+        <p class="body-md text-body mb-lg">
+          PayDecode uses a rigorous <strong>monotonic mathematical binary search</strong> that tests candidate CTC figures through our complete payroll engine until it converges within ₹10 of your target monthly bank credit.
+        </p>
+
+        <h3 class="title-lg mb-sm">Why is Required CTC Always Higher Than Take-Home × 12?</h3>
+        <p class="body-md text-body mb-base">
+          To credit ₹1,00,000 into your account each month, an employer typically spends ₹1.15 Lakh to ₹1.25 Lakh per month. The gap consists of:
+        </p>
+        <ul class="seo-list mb-lg">
+          <li><strong>Employee Provident Fund (EPF):</strong> 12% of your PF wage base (up to ₹3,000/month under the ₹25,000 wage ceiling).</li>
+          <li><strong>Employer Provident Fund:</strong> An equal 12% contribution borne by the employer, which is subtracted from your CTC before cash salary is calculated.</li>
+          <li><strong>Gratuity Accrual:</strong> Under the Payment of Gratuity Act, 1972, companies set aside 15/26 of monthly basic salary per year (approx 4.81% of basic salary).</li>
+          <li><strong>Professional Tax:</strong> State-level tax (up to ₹2,500 annually in states like Maharashtra, Karnataka, Telangana, and Tamil Nadu).</li>
+          <li><strong>Tax Deducted at Source (TDS):</strong> Annual income tax calculated according to Section 202 of the Income-tax Act, 2025.</li>
+        </ul>
+
+        <h3 class="title-lg mb-sm">Frequently Asked Questions</h3>
+        <div class="faq-accordion mt-md">
+          <details class="faq-item" open>
+            <summary class="faq-question">How much CTC do I need for ₹50,000 in-hand per month?</summary>
+            <div class="faq-answer">
+              <p>For ₹50,000 monthly take-home under the New Tax Regime (Tax Year 2026–27), you need an annual CTC of approximately ₹6.6 Lakh to ₹6.9 Lakh. At this salary level, taxable income after the ₹75,000 standard deduction is below ₹12 Lakh, which qualifies for a 100% tax rebate under Section 156. Therefore, you pay <strong>zero income tax</strong>!</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How much CTC is needed for ₹1.5 Lakh in-hand per month?</summary>
+            <div class="faq-answer">
+              <p>To take home ₹1,50,000 net per month, you require an annual CTC of approximately ₹22.5 Lakh to ₹23.5 Lakh. At this level, your annual income tax will be approximately ₹2.5 Lakh to ₹2.8 Lakh under the New Regime.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Does this calculator upload my target salary to any server?</summary>
+            <div class="faq-answer">
+              <p>No. In accordance with PayDecode's privacy-first architecture, all calculations run 100% inside your browser's JavaScript engine. Your numbers never touch an external server or database.</p>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 460px 1fr;
+    }
+  }
+
+  .quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .chip-btn {
+    padding: 4px 10px;
+    border-radius: var(--rounded-pill);
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-body);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .chip-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .chip-btn.active {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #ffffff;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 16px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+
+  .salary-bar {
+    display: flex;
+    height: 12px;
+    border-radius: var(--rounded-pill);
+    overflow: hidden;
+    background: var(--color-surface-strong);
+  }
+
+  .salary-bar-segment {
+    height: 100%;
+    transition: width var(--transition-slow);
+  }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-content-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    background: var(--color-canvas);
+  }
+
+  .faq-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-body);
+  }
+
+  .assumptions-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .assumptions-list li {
+    font-size: 13px;
+    color: var(--color-muted);
+    padding: 3px 0 3px 16px;
+    position: relative;
+  }
+
+  .assumptions-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+  }
+</style>
+
+<script>
+  import { reverseCalculate } from '../utils/reverseCalculator';
+  import { parseSalaryInput, formatINR, numberToIndianWords } from '../utils/formatCurrency';
+  import type { PfPolicy } from '../config/statutoryRules';
+  import type { TaxRegime } from '../utils/taxEngine';
+
+  const inhandInput = document.getElementById('target-inhand-input') as HTMLInputElement;
+  const pfSelect = document.getElementById('pf-policy') as HTMLSelectElement;
+  const ptSelect = document.getElementById('pt-state') as HTMLSelectElement;
+  const gratuityCheckbox = document.getElementById('include-gratuity') as HTMLInputElement;
+  const calcBtn = document.getElementById('calculate-btn') as HTMLButtonElement;
+  const chips = document.querySelectorAll('.chip-btn');
+
+  // Outputs
+  const resRequiredCTC = document.getElementById('res-required-ctc')!;
+  const resCTCWords = document.getElementById('res-ctc-words')!;
+  const resMonthlyInHand = document.getElementById('res-monthly-inhand')!;
+  const resMonthlyGross = document.getElementById('res-monthly-gross')!;
+  const resAnnualTax = document.getElementById('res-annual-tax')!;
+  const resMonthlyTDS = document.getElementById('res-monthly-tds')!;
+  const breakdownTbody = document.getElementById('breakdown-tbody')!;
+  const assumptionsList = document.getElementById('assumptions-list')!;
+
+  const barInhand = document.getElementById('bar-inhand')!;
+  const barTax = document.getElementById('bar-tax')!;
+  const barPf = document.getElementById('bar-pf')!;
+  const barOther = document.getElementById('bar-other')!;
+
+  function getSelectedBasicPercent(): number {
+    const checked = document.querySelector('input[name="basic-percent"]:checked') as HTMLInputElement;
+    return Number(checked?.value ?? 40);
+  }
+
+  function getSelectedRegime(): TaxRegime {
+    const checked = document.querySelector('input[name="regime"]:checked') as HTMLInputElement;
+    return (checked?.value ?? 'new') as TaxRegime;
+  }
+
+  function runReverseCalc() {
+    const targetMonthly = parseSalaryInput(inhandInput.value);
+    if (!targetMonthly || targetMonthly <= 0) return;
+
+    const basicPercent = getSelectedBasicPercent();
+    const regime = getSelectedRegime();
+    const pfPolicy = pfSelect.value as PfPolicy;
+    const ptState = ptSelect.value;
+    const includeGratuity = gratuityCheckbox.checked;
+
+    const res = reverseCalculate(targetMonthly, {
+      basicPercent,
+      regime,
+      pfPolicy,
+      professionalTaxState: ptState,
+      includeGratuity,
+    });
+
+    if (!res.found || !res.breakdown) {
+      resRequiredCTC.textContent = 'Calculation Error';
+      resCTCWords.textContent = res.error ?? 'Target unreachable';
+      return;
+    }
+
+    const b = res.breakdown;
+
+    // Display numbers
+    resRequiredCTC.textContent = formatINR(res.estimatedCTC);
+    resCTCWords.textContent = `approx ${numberToIndianWords(res.estimatedCTC)} Rupees`;
+    resMonthlyInHand.textContent = formatINR(b.monthlyInHand);
+    resMonthlyGross.textContent = formatINR(b.monthlyGross);
+    resAnnualTax.textContent = formatINR(b.tax.totalTax);
+    resMonthlyTDS.textContent = formatINR(b.tax.monthlyTDS);
+
+    // Update Bar
+    const inhandPct = Math.round((b.annualInHand / b.annualCTC) * 100);
+    const taxPct = Math.round((b.tax.totalTax / b.annualCTC) * 100);
+    const pfPct = Math.round(((b.employerPF.annualEmployerPF + b.employeePF) / b.annualCTC) * 100);
+    const otherPct = Math.max(0, 100 - inhandPct - taxPct - pfPct);
+
+    barInhand.style.width = `${inhandPct}%`;
+    barTax.style.width = `${taxPct}%`;
+    barPf.style.width = `${pfPct}%`;
+    barOther.style.width = `${otherPct}%`;
+
+    // Populate Table
+    const rows = [
+      {
+        name: 'Take-Home Bank Credit',
+        monthly: b.monthlyInHand,
+        annual: b.annualInHand,
+        pct: ((b.annualInHand / b.annualCTC) * 100).toFixed(1),
+        highlight: true,
+      },
+      {
+        name: 'Income Tax (TDS)',
+        monthly: b.tax.monthlyTDS,
+        annual: b.tax.totalTax,
+        pct: ((b.tax.totalTax / b.annualCTC) * 100).toFixed(1),
+      },
+      {
+        name: 'Employee PF (12%)',
+        monthly: b.monthlyEmployeePF,
+        annual: b.employeePF,
+        pct: ((b.employeePF / b.annualCTC) * 100).toFixed(1),
+      },
+      {
+        name: 'Employer PF (12%)',
+        monthly: b.employerPF.monthlyEmployerPF,
+        annual: b.employerPF.annualEmployerPF,
+        pct: ((b.employerPF.annualEmployerPF / b.annualCTC) * 100).toFixed(1),
+      },
+      {
+        name: 'Professional Tax',
+        monthly: b.monthlyProfessionalTax,
+        annual: b.professionalTax,
+        pct: ((b.professionalTax / b.annualCTC) * 100).toFixed(1),
+      },
+    ];
+
+    if (includeGratuity && b.gratuity.annualAccrual > 0) {
+      rows.push({
+        name: 'Gratuity Accrual (CTC provision)',
+        monthly: b.gratuity.monthlyAccrual,
+        annual: b.gratuity.annualAccrual,
+        pct: ((b.gratuity.annualAccrual / b.annualCTC) * 100).toFixed(1),
+      });
+    }
+
+    breakdownTbody.innerHTML = rows
+      .map(
+        (r) => `
+        <tr ${r.highlight ? 'style="font-weight:600; background:rgba(5, 177, 105, 0.06);"' : ''}>
+          <td>${r.name}</td>
+          <td class="text-right">${formatINR(r.monthly)}</td>
+          <td class="text-right">${formatINR(r.annual)}</td>
+          <td class="text-right">${r.pct}%</td>
+        </tr>
+      `
+      )
+      .join('');
+
+    // Assumptions
+    assumptionsList.innerHTML = b.assumptions
+      .map((a) => `<li>${a}</li>`)
+      .join('');
+  }
+
+  // Event Listeners
+  inhandInput.addEventListener('input', runReverseCalc);
+  calcBtn.addEventListener('click', runReverseCalc);
+  pfSelect.addEventListener('change', runReverseCalc);
+  ptSelect.addEventListener('change', runReverseCalc);
+  gratuityCheckbox.addEventListener('change', runReverseCalc);
+
+  document.querySelectorAll('input[name="basic-percent"]').forEach((el) => {
+    el.addEventListener('change', runReverseCalc);
+  });
+  document.querySelectorAll('input[name="regime"]').forEach((el) => {
+    el.addEventListener('change', runReverseCalc);
+  });
+
+  // Preset chips
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chips.forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const val = chip.getAttribute('data-val');
+      if (val) {
+        inhandInput.value = val;
+        runReverseCalc();
+      }
+    });
+  });
+
+  // Initial Run
+  runReverseCalc();
+</script>
