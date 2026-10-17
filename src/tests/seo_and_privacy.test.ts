@@ -207,6 +207,13 @@ describe('SEO, Canonical Domain & Privacy Automated Test Suite', () => {
         ).toBe(true);
       }
     });
+
+    it('verifies sitemap.xml exists as an accessible direct alias of sitemap index', () => {
+      const sitemapPath = path.join(distDir, 'sitemap.xml');
+      expect(fs.existsSync(sitemapPath), 'dist/sitemap.xml must exist for standard crawlers').toBe(true);
+      const content = fs.readFileSync(sitemapPath, 'utf-8');
+      expect(content).toContain(site.url);
+    });
   });
 
   describe('4. Simulated Payslip Statutory Invariant', () => {

@@ -6,6 +6,7 @@ export const GET: APIRoute = () => {
 Allow: /
 
 Sitemap: ${site.url}/sitemap-index.xml
+Sitemap: ${site.url}/sitemap.xml
 `;
 
   return new Response(robotsTxt, {
