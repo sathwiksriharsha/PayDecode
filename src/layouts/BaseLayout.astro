@@ -24,7 +24,14 @@ const {
   jsonLd,
 } = Astro.props;
 
-const canonicalURL = new URL(canonicalPath, site.url).href;
+const normalizedCanonical =
+  canonicalPath === "" || canonicalPath === "/"
+    ? "/"
+    : canonicalPath.endsWith("/")
+      ? canonicalPath
+      : `${canonicalPath}/`;
+
+const canonicalURL = new URL(normalizedCanonical, site.url).href;
 const ogImageURL = new URL(ogImage, site.url).href;
 const fullTitle =
   canonicalPath === "/" || canonicalPath === ""

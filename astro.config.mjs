@@ -6,7 +6,7 @@ const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://paydecode.pages.dev').r
 // https://astro.build/config
 export default defineConfig({
   site: siteUrl,
-  trailingSlash: 'never',
+  trailingSlash: 'always',
   compressHTML: true,
   integrations: [sitemap()],
   build: {
