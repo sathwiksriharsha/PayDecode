@@ -1,0 +1,843 @@
+---
+/**
+ * Variable Pay & Performance Bonus Calculator
+ * Target Keyword: "Variable Pay Calculator India — Performance Bonus After Tax & Take-Home Estimator"
+ * Pure client-side progressive tax engine (TaxWithBonus - TaxWithoutBonus).
+ * Compliant with Income-tax Act, 2025 (Tax Year 2026–27).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+
+const title = 'Variable Pay Calculator India — Performance Bonus After Tax & Take-Home Estimator';
+const description = 'Calculate your real take-home performance bonus after income tax TDS in India. Progressive tax difference engine (TaxWithBonus - TaxWithoutBonus) for 5% to 20% variable pay at 50%–120% payout under New Tax Regime 2026–27.';
+
+const canonicalPath = '/variable-pay-calculator';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${title} — ${site.name}`,
+  description,
+  url: `${site.url}${canonicalPath}`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+    { '@type': 'ListItem', position: 2, name: 'Variable Pay Calculator', item: `${site.url}${canonicalPath}` },
+  ],
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Is variable pay taxed at a flat 30% in India?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. Variable pay is never taxed at an arbitrary flat rate. In India, performance bonuses are added to your total annual gross salary for the financial year. The actual tax deducted (TDS) is determined by your progressive marginal slab rate (TaxWithBonus minus TaxWithoutBonus). Depending on your baseline income, your bonus might be taxed at 5%, 10%, 15%, 20%, or 30% plus 4% health and education cess.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Does variable pay affect Employee Provident Fund (EPF) or gratuity?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. In India, EPF and gratuity calculations are legally tied to Basic Salary and Dearness Allowance (DA). Variable pay and annual performance bonuses are classified as incentive allowances, so they do not increase your monthly PF or gratuity deductions.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How does performance multiplier impact my actual bonus payout?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Most Indian companies (TCS, Infosys, Accenture, Wipro, and MNCs) determine bonus payouts by multiplying your target variable pay by a company or individual performance multiplier (typically 50% to 120%). For example, on a ₹2,00,000 target bonus, a 120% rating delivers ₹2,40,000 pre-tax, whereas an 80% rating delivers ₹1,60,000 pre-tax.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the Section 156 rebate cliff for bonuses?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Under the New Tax Regime (Tax Year 2026–27), individuals with taxable income up to ₹12,00,000 pay zero income tax due to the Section 156 rebate. If a bonus pushes your taxable income above ₹12,00,000, marginal relief ensures tax before cess does not exceed the income above ₹12 Lakh, but your net bonus will face incremental taxation for the first time.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  jsonLd={jsonLd}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+
+  <!-- Breadcrumb -->
+  <div class="container mt-lg mb-lg">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="/ctc-to-inhand-calculator">Calculators</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Variable Pay Calculator</span>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="calc-layout">
+
+      <!-- ═══ Left: Input Parameters ═══ -->
+      <div class="calc-inputs">
+        <div class="card">
+          <div class="badge badge-accent mb-sm">Bonus & Incentive Estimator</div>
+          <h1 class="display-sm mb-xs">Variable Pay Calculator</h1>
+          <p class="body-sm text-muted mb-xl">
+            See how much of your performance bonus or variable pay actually lands in your bank account after progressive annual income tax TDS.
+          </p>
+
+          <!-- Fixed Annual CTC -->
+          <div class="input-group">
+            <label for="fixed-ctc" class="input-label">Base Annual CTC (Fixed Pay)</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="text"
+                id="fixed-ctc"
+                class="input input-number"
+                placeholder="e.g. 15,00,000 or 15L"
+                value="1500000"
+                inputmode="decimal"
+                autocomplete="off"
+              />
+            </div>
+            <div class="quick-chips mt-xs">
+              <button type="button" class="ctc-chip" data-ctc="600000">6L</button>
+              <button type="button" class="ctc-chip" data-ctc="1000000">10L</button>
+              <button type="button" class="ctc-chip active" data-ctc="1500000">15L</button>
+              <button type="button" class="ctc-chip" data-ctc="2500000">25L</button>
+              <button type="button" class="ctc-chip" data-ctc="4000000">40L</button>
+            </div>
+          </div>
+
+          <!-- Target Variable Pay % -->
+          <div class="input-group mt-md">
+            <div class="label-row">
+              <label for="variable-pct" class="input-label">Target Variable Pay (% of CTC)</label>
+              <span class="label-val font-mono" id="variable-pct-val">10%</span>
+            </div>
+            <input
+              type="range"
+              id="variable-pct"
+              class="input-range"
+              min="0"
+              max="50"
+              step="1"
+              value="10"
+            />
+            <div class="quick-chips mt-xs">
+              <button type="button" class="var-chip" data-var="5">5%</button>
+              <button type="button" class="var-chip active" data-var="10">10%</button>
+              <button type="button" class="var-chip" data-var="15">15%</button>
+              <button type="button" class="var-chip" data-var="20">20%</button>
+            </div>
+          </div>
+
+          <!-- Payout Multiplier % -->
+          <div class="input-group mt-md">
+            <div class="label-row">
+              <label for="multiplier-pct" class="input-label">Performance Payout Multiplier</label>
+              <span class="label-val font-mono text-primary font-bold" id="multiplier-pct-val">100%</span>
+            </div>
+            <input
+              type="range"
+              id="multiplier-pct"
+              class="input-range"
+              min="0"
+              max="150"
+              step="5"
+              value="100"
+            />
+            <div class="quick-chips mt-xs">
+              <button type="button" class="mul-chip" data-mul="50">50% (Under)</button>
+              <button type="button" class="mul-chip" data-mul="80">80%</button>
+              <button type="button" class="mul-chip active" data-mul="100">100% (Target)</button>
+              <button type="button" class="mul-chip" data-mul="110">110%</button>
+              <button type="button" class="mul-chip" data-mul="120">120% (Top Exceed)</button>
+            </div>
+          </div>
+
+          <!-- Tax Regime & Assumptions -->
+          <div class="input-group mt-lg pt-md border-top">
+            <label class="input-label mb-xs">Tax Regime (Tax Year 2026–27)</label>
+            <div class="radio-toggle-group">
+              <label class="radio-toggle-label">
+                <input type="radio" name="regime" value="new" checked />
+                <span>New Regime (Section 202)</span>
+              </label>
+              <label class="radio-toggle-label">
+                <input type="radio" name="regime" value="old" />
+                <span>Old Regime</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="input-group mt-md">
+            <label for="pf-policy" class="input-label">EPF Wage Ceiling Policy</label>
+            <select id="pf-policy" class="select-input">
+              <option value="statutory_ceiling" selected>Statutory Ceiling (₹25,000/mo from Sep 2026)</option>
+              <option value="full_basic">Full Basic Salary (Uncapped voluntary)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Ad Slot 1 -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-var-1">
+            <div class="ad-placeholder">
+              <span>Tax-Saving Mutual Funds & High Yield Liquid Savings Accounts</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ Right: Take-Home Results & Decomposition ═══ -->
+      <div class="calc-results">
+
+        <!-- Hero Card -->
+        <div class="card card-hero-result">
+          <div class="hero-result-header">
+            <span class="hero-result-label">Net In-Hand Bonus Take-Home</span>
+            <span class="badge badge-success" id="hero-multiplier-badge">100% Payout</span>
+          </div>
+
+          <div class="hero-result-amount text-success" id="net-bonus-amount">₹1,24,800</div>
+          <div class="hero-result-sub" id="net-bonus-sub">
+            Realized cash deposited in bank after ₹25,200 progressive income tax TDS
+          </div>
+
+          <!-- Hero Key Stats Grid -->
+          <div class="hero-stats-grid mt-lg">
+            <div class="hero-stat-box">
+              <span class="stat-caption">Target Variable</span>
+              <span class="stat-val font-mono" id="stat-target-var">₹1,50,000</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Gross Bonus Realized</span>
+              <span class="stat-val font-mono text-primary" id="stat-realized-var">₹1,50,000</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Incremental Tax (TDS)</span>
+              <span class="stat-val font-mono text-danger" id="stat-tax-deducted">₹25,200</span>
+            </div>
+            <div class="hero-stat-box">
+              <span class="stat-caption">Effective Tax on Bonus</span>
+              <span class="stat-val font-mono" id="stat-tax-rate">16.8%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progressive Difference Engine Card -->
+        <div class="card mt-lg">
+          <div class="badge badge-primary mb-xs">Progressive Slab Difference Engine</div>
+          <h2 class="title-md mb-xs">Tax Before vs. Tax After Bonus</h2>
+          <p class="body-sm text-muted mb-md">
+            Indian income tax applies progressive brackets to your cumulative annual earnings. Bonus tax is computed strictly as <code>Tax(Total Income + Bonus) − Tax(Total Income)</code>:
+          </p>
+
+          <div class="table-container mb-lg">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th class="text-right">Without Bonus</th>
+                  <th class="text-right">With Bonus</th>
+                  <th class="text-right">Net Impact (Bonus)</th>
+                </tr>
+              </thead>
+              <tbody id="diff-table-body">
+                <!-- Injected via script -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="alert alert-info p-md" id="rebate-cliff-alert" style="display: none;">
+            <p class="body-sm" style="margin: 0;">
+              <strong>Rebate Notice:</strong> Your base salary was eligible for the ₹12 Lakh zero-tax rebate under Section 156. Adding this bonus crosses the threshold; Section 156 Marginal Relief protects you so tax before cess does not exceed your excess income over ₹12 Lakh.
+            </p>
+          </div>
+        </div>
+
+        <!-- Multiplier Payout Scenario Grid -->
+        <div class="card mt-lg">
+          <h2 class="title-md mb-xs">Payout Multiplier Sensitivity (50% – 120%)</h2>
+          <p class="body-sm text-muted mb-md">
+            Compare take-home cash across corporate rating multipliers at your selected target variable:
+          </p>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Multiplier / Performance</th>
+                  <th class="text-right">Gross Bonus</th>
+                  <th class="text-right">Tax Deducted</th>
+                  <th class="text-right">In-Hand Cash</th>
+                  <th class="text-right">Effective Tax</th>
+                </tr>
+              </thead>
+              <tbody id="multiplier-matrix-body">
+                <!-- Injected via script -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ad Slot 2 -->
+        <div class="ad-container-outer mt-lg">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-slot ad-responsive" id="ad-slot-var-2">
+            <div class="ad-placeholder">
+              <span>Personal Loan Rates & Emergency Funds for Salaried Professionals</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══ SEO Educational Article ═══ -->
+    <section class="seo-guide mt-xxl pt-xl border-top">
+      <div class="max-content-text">
+        <h2 class="display-sm mb-md">How Variable Pay & Performance Bonus Are Taxed in India</h2>
+        <p class="body-md text-body mb-lg">
+          Many employees in Indian IT companies (such as TCS, Infosys, Wipro, Accenture, Cognizant) and MNCs are surprised when their annual performance bonus is deposited into their salary account. The net credit is frequently 15% to 35% lower than the gross bonus number listed in their appraisal letter.
+        </p>
+
+        <h3 class="title-lg mb-sm">Why Variable Pay is Never Taxed at a Flat 30%</h3>
+        <p class="body-md text-body mb-md">
+          A common workplace myth claims that bonuses are taxed at an arbitrary flat rate like 30%. Under the <strong>Income-tax Act, 2025 (Tax Year 2026–27)</strong>, bonuses are treated as normal salary income:
+        </p>
+        <ul class="seo-list mb-lg">
+          <li>
+            <strong>Incremental Marginal Slabs:</strong> Your employer's payroll software projects your full annual earnings. When your performance bonus is disbursed (often in Q1 or Q3), TDS is withheld at your highest marginal tax slab. If your total income sits in the 15% bracket, the bonus is taxed at 15% plus 4% cess (15.6%).
+          </li>
+          <li>
+            <strong>Slab Crossing:</strong> A generous ₹3 Lakh bonus can push you across multiple slab boundaries (e.g., from 15% into the 20% bracket). Each portion of the bonus is taxed according to the slab it fills.
+          </li>
+          <li>
+            <strong>Zero PF and Gratuity Impact:</strong> Unlike basic salary, variable compensation does not attract statutory Employee Provident Fund (EPF) deductions or gratuity provisioning. 100% of the deduction is purely income tax TDS.
+          </li>
+        </ul>
+
+        <h3 class="title-lg mb-sm">Section 156 Rebate & Marginal Relief Dynamics</h3>
+        <p class="body-md text-body mb-lg">
+          Under Section 202 of the New Tax Regime, taxable income up to ₹12,00,000 receives a 100% tax rebate under Section 156. If your fixed salary is ₹11,00,000 and you receive a ₹2,00,000 variable payout, your total taxable income jumps to ₹13,00,000. Marginal relief automatically ensures that your tax payable before 4% cess is legally capped at exactly the excess income over ₹12 Lakh (₹1,00,000), preventing any unfair cliff penalty.
+        </p>
+
+        <h3 class="title-lg mb-sm">Frequently Asked Questions</h3>
+        <div class="faq-accordion mt-md">
+          <details class="faq-item" open>
+            <summary class="faq-question">Is variable pay taxed at a flat 30% in India?</summary>
+            <div class="faq-answer">
+              <p>No. Variable pay is never taxed at an arbitrary flat rate. In India, performance bonuses are added to your total annual gross salary for the financial year. The actual tax deducted (TDS) is determined by your progressive marginal slab rate (TaxWithBonus minus TaxWithoutBonus). Depending on your baseline income, your bonus might be taxed at 5%, 10%, 15%, 20%, or 30% plus 4% health and education cess.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Does variable pay affect Employee Provident Fund (EPF) or gratuity?</summary>
+            <div class="faq-answer">
+              <p>No. In India, EPF and gratuity calculations are legally tied to Basic Salary and Dearness Allowance (DA). Variable pay and annual performance bonuses are classified as incentive allowances, so they do not increase your monthly PF or gratuity deductions.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How does performance multiplier impact my actual bonus payout?</summary>
+            <div class="faq-answer">
+              <p>Most Indian companies (TCS, Infosys, Accenture, Wipro, and MNCs) determine bonus payouts by multiplying your target variable pay by a company or individual performance multiplier (typically 50% to 120%). For example, on a ₹2,00,000 target bonus, a 120% rating delivers ₹2,40,000 pre-tax, whereas an 80% rating delivers ₹1,60,000 pre-tax.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">What is the Section 156 rebate cliff for bonuses?</summary>
+            <div class="faq-answer">
+              <p>Under the New Tax Regime (Tax Year 2026–27), individuals with taxable income up to ₹12,00,000 pay zero income tax due to the Section 156 rebate. If a bonus pushes your taxable income above ₹12,00,000, marginal relief ensures tax before cess does not exceed the income above ₹12 Lakh, but your net bonus will face incremental taxation for the first time.</p>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .calc-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 992px) {
+    .calc-layout {
+      grid-template-columns: 440px 1fr;
+    }
+  }
+
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .label-val {
+    font-size: 14px;
+  }
+
+  .input-range {
+    width: 100%;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+  }
+
+  .quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .ctc-chip,
+  .var-chip,
+  .mul-chip {
+    padding: 4px 10px;
+    border-radius: var(--rounded-pill);
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-body);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .ctc-chip:hover,
+  .var-chip:hover,
+  .mul-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .ctc-chip.active,
+  .var-chip.active,
+  .mul-chip.active {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .radio-toggle-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    background: var(--color-surface-soft);
+    padding: 4px;
+    border-radius: var(--rounded-md);
+  }
+
+  .radio-toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: var(--rounded-sm);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .radio-toggle-label input {
+    margin: 0;
+  }
+
+  .card-hero-result {
+    background: linear-gradient(135deg, #0a0b0d 0%, #16181c 100%);
+    color: #ffffff;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-xl);
+  }
+
+  .hero-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .hero-result-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-on-dark-soft);
+  }
+
+  .hero-result-amount {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: var(--font-mono);
+  }
+
+  .hero-result-sub {
+    font-size: 13px;
+    color: var(--color-on-dark-soft);
+    margin-top: var(--space-xxs);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-caption {
+    font-size: 11px;
+    color: var(--color-on-dark-soft);
+    text-transform: uppercase;
+  }
+
+  .stat-val {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .text-success { color: #05b169 !important; }
+  .text-danger { color: #ff5252 !important; }
+  .text-primary { color: var(--color-primary) !important; }
+  .font-mono { font-family: var(--font-mono); }
+
+  .ad-container-outer {
+    background: var(--color-surface-soft);
+    border: 1px dashed var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-xs);
+    text-align: center;
+  }
+
+  .ad-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-muted-soft);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .ad-slot {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-placeholder {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .max-content-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .seo-list {
+    padding-left: var(--space-lg);
+    line-height: 1.8;
+    color: var(--color-body);
+  }
+
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    padding: var(--space-md);
+    background: var(--color-canvas);
+  }
+
+  .faq-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-body);
+  }
+
+  .select-input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--rounded-sm);
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    font-size: 13px;
+  }
+</style>
+
+<script>
+  import { calculateSalary } from '../utils/salaryEngine';
+  import { calculateIncomeTax } from '../utils/taxEngine';
+  import { parseSalaryInput, formatINR } from '../utils/formatCurrency';
+  import type { PfPolicy } from '../config/statutoryRules';
+  import type { TaxRegime } from '../utils/taxEngine';
+
+  const fixedCtcInput = document.getElementById('fixed-ctc') as HTMLInputElement;
+  const variablePctInput = document.getElementById('variable-pct') as HTMLInputElement;
+  const variablePctVal = document.getElementById('variable-pct-val')!;
+  const multiplierPctInput = document.getElementById('multiplier-pct') as HTMLInputElement;
+  const multiplierPctVal = document.getElementById('multiplier-pct-val')!;
+  const pfPolicySelect = document.getElementById('pf-policy') as HTMLSelectElement;
+
+  // Hero card outputs
+  const netBonusAmount = document.getElementById('net-bonus-amount')!;
+  const netBonusSub = document.getElementById('net-bonus-sub')!;
+  const heroMultiplierBadge = document.getElementById('hero-multiplier-badge')!;
+  const statTargetVar = document.getElementById('stat-target-var')!;
+  const statRealizedVar = document.getElementById('stat-realized-var')!;
+  const statTaxDeducted = document.getElementById('stat-tax-deducted')!;
+  const statTaxRate = document.getElementById('stat-tax-rate')!;
+
+  // Tables
+  const diffTableBody = document.getElementById('diff-table-body')!;
+  const multiplierMatrixBody = document.getElementById('multiplier-matrix-body')!;
+  const rebateCliffAlert = document.getElementById('rebate-cliff-alert')!;
+
+  function getSelectedRegime(): TaxRegime {
+    const checked = document.querySelector('input[name="regime"]:checked') as HTMLInputElement;
+    return (checked?.value ?? 'new') as TaxRegime;
+  }
+
+  function runVariableCalc() {
+    const fixedCTC = parseSalaryInput(fixedCtcInput.value);
+    if (!fixedCTC || fixedCTC <= 0) return;
+
+    const variablePct = Number(variablePctInput.value) || 0;
+    const multiplierPct = Number(multiplierPctInput.value) || 0;
+    const regime = getSelectedRegime();
+    const pfPolicy = pfPolicySelect.value as PfPolicy;
+
+    variablePctVal.textContent = `${variablePct}%`;
+    multiplierPctVal.textContent = `${multiplierPct}%`;
+    heroMultiplierBadge.textContent = `${multiplierPct}% Payout`;
+
+    // 1. Calculate Baseline (Without Bonus)
+    const baseline = calculateSalary({
+      annualCTC: fixedCTC,
+      basicPercent: 40,
+      pfPolicy,
+      regime,
+    });
+
+    const targetVariableAmount = Math.round(fixedCTC * (variablePct / 100));
+    const realizedBonusAmount = Math.round(targetVariableAmount * (multiplierPct / 100));
+
+    // 2. Calculate With Bonus using progressive difference engine
+    // Bonus is added to annual gross salary
+    const grossWithoutBonus = baseline.annualGross;
+    const grossWithBonus = grossWithoutBonus + realizedBonusAmount;
+
+    const taxWithoutBonus = calculateIncomeTax({
+      annualGrossSalary: grossWithoutBonus,
+      regime,
+      annualBasicSalary: baseline.annualBasic,
+      professionalTax: baseline.professionalTax,
+    });
+
+    const taxWithBonus = calculateIncomeTax({
+      annualGrossSalary: grossWithBonus,
+      regime,
+      annualBasicSalary: baseline.annualBasic,
+      professionalTax: baseline.professionalTax,
+    });
+
+    const incrementalTaxOnBonus = Math.max(0, taxWithBonus.totalTax - taxWithoutBonus.totalTax);
+    const netTakeHomeBonus = Math.max(0, realizedBonusAmount - incrementalTaxOnBonus);
+    const effectiveTaxRate = realizedBonusAmount > 0 ? (incrementalTaxOnBonus / realizedBonusAmount) * 100 : 0;
+
+    // Update Hero UI
+    netBonusAmount.textContent = formatINR(netTakeHomeBonus);
+    netBonusSub.textContent = `Realized cash deposited in bank after ${formatINR(incrementalTaxOnBonus)} progressive income tax TDS`;
+    statTargetVar.textContent = formatINR(targetVariableAmount);
+    statRealizedVar.textContent = formatINR(realizedBonusAmount);
+    statTaxDeducted.textContent = formatINR(incrementalTaxOnBonus);
+    statTaxRate.textContent = `${effectiveTaxRate.toFixed(1)}%`;
+
+    // Check rebate cliff alert
+    if (taxWithoutBonus.totalTax === 0 && taxWithBonus.totalTax > 0) {
+      rebateCliffAlert.style.display = 'block';
+    } else {
+      rebateCliffAlert.style.display = 'none';
+    }
+
+    // Populate Progressive Difference Table
+    const diffRows = [
+      {
+        name: 'Annual Gross Salary',
+        without: formatINR(grossWithoutBonus),
+        withBonus: formatINR(grossWithBonus),
+        impact: `+${formatINR(realizedBonusAmount)}`,
+        highlight: false,
+      },
+      {
+        name: 'Taxable Income (After Sec 19 Standard Deduction)',
+        without: formatINR(taxWithoutBonus.taxableIncome),
+        withBonus: formatINR(taxWithBonus.taxableIncome),
+        impact: `+${formatINR(taxWithBonus.taxableIncome - taxWithoutBonus.taxableIncome)}`,
+        highlight: false,
+      },
+      {
+        name: 'Annual Income Tax Liability (Slabs + Cess)',
+        without: formatINR(taxWithoutBonus.totalTax),
+        withBonus: formatINR(taxWithBonus.totalTax),
+        impact: `+${formatINR(incrementalTaxOnBonus)} (TDS on Bonus)`,
+        highlight: true,
+      },
+      {
+        name: 'Net Realized Bonus in Hand',
+        without: '₹0',
+        withBonus: formatINR(netTakeHomeBonus),
+        impact: `${formatINR(netTakeHomeBonus)} (${(100 - effectiveTaxRate).toFixed(1)}% kept)`,
+        highlight: true,
+      },
+    ];
+
+    diffTableBody.innerHTML = diffRows
+      .map(
+        (r) => `
+        <tr ${r.highlight ? 'style="font-weight:600; background:rgba(5, 177, 105, 0.06);"' : ''}>
+          <td>${r.name}</td>
+          <td class="text-right font-mono">${r.without}</td>
+          <td class="text-right font-mono">${r.withBonus}</td>
+          <td class="text-right font-mono ${r.highlight ? 'text-success' : ''}">${r.impact}</td>
+        </tr>
+      `
+      )
+      .join('');
+
+    // Populate Multiplier Matrix (50%, 80%, 100%, 110%, 120%)
+    const multipliers = [
+      { pct: 50, label: '50% (Underperformance)' },
+      { pct: 80, label: '80% (Threshold Met)' },
+      { pct: 100, label: '100% (Target Achieved)' },
+      { pct: 110, label: '110% (Exceeds Target)' },
+      { pct: 120, label: '120% (Top Performer)' },
+    ];
+
+    multiplierMatrixBody.innerHTML = multipliers
+      .map((m) => {
+        const gross = Math.round(targetVariableAmount * (m.pct / 100));
+        const tw = calculateIncomeTax({
+          annualGrossSalary: grossWithoutBonus + gross,
+          regime,
+          annualBasicSalary: baseline.annualBasic,
+          professionalTax: baseline.professionalTax,
+        });
+        const incTax = Math.max(0, tw.totalTax - taxWithoutBonus.totalTax);
+        const inHand = Math.max(0, gross - incTax);
+        const effRate = gross > 0 ? (incTax / gross) * 100 : 0;
+        const isCurrent = m.pct === multiplierPct;
+
+        return `
+          <tr ${isCurrent ? 'style="font-weight:700; background:rgba(30, 64, 175, 0.08);"' : ''}>
+            <td>${m.label} ${isCurrent ? '<span class="badge badge-primary">Selected</span>' : ''}</td>
+            <td class="text-right font-mono">${formatINR(gross)}</td>
+            <td class="text-right font-mono text-danger">${formatINR(incTax)}</td>
+            <td class="text-right font-mono text-success">${formatINR(inHand)}</td>
+            <td class="text-right font-mono">${effRate.toFixed(1)}%</td>
+          </tr>
+        `;
+      })
+      .join('');
+  }
+
+  // Event Listeners
+  fixedCtcInput.addEventListener('input', runVariableCalc);
+  variablePctInput.addEventListener('input', runVariableCalc);
+  multiplierPctInput.addEventListener('input', runVariableCalc);
+  pfPolicySelect.addEventListener('change', runVariableCalc);
+
+  document.querySelectorAll('input[name="regime"]').forEach((el) => {
+    el.addEventListener('change', runVariableCalc);
+  });
+
+  // Chip Listeners
+  document.querySelectorAll('.ctc-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.ctc-chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const val = chip.getAttribute('data-ctc');
+      if (val) {
+        fixedCtcInput.value = val;
+        runVariableCalc();
+      }
+    });
+  });
+
+  document.querySelectorAll('.var-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.var-chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const val = chip.getAttribute('data-var');
+      if (val) {
+        variablePctInput.value = val;
+        runVariableCalc();
+      }
+    });
+  });
+
+  document.querySelectorAll('.mul-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.mul-chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const val = chip.getAttribute('data-mul');
+      if (val) {
+        multiplierPctInput.value = val;
+        runVariableCalc();
+      }
+    });
+  });
+
+  // Initial Calculation
+  runVariableCalc();
+</script>

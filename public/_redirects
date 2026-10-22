@@ -1,8 +1,31 @@
 # Cloudflare Pages 301 Redirects for Dot-in-Slug legacy and manual entries
+/salary/1.8-lpa-in-hand-salary    /salary/1-8-lpa-in-hand-salary    301
+/salary/2.2-lpa-in-hand-salary    /salary/2-2-lpa-in-hand-salary    301
+/salary/2.4-lpa-in-hand-salary    /salary/2-4-lpa-in-hand-salary    301
 /salary/2.5-lpa-in-hand-salary    /salary/2-5-lpa-in-hand-salary    301
+/salary/2.6-lpa-in-hand-salary    /salary/2-6-lpa-in-hand-salary    301
+/salary/2.7-lpa-in-hand-salary    /salary/2-7-lpa-in-hand-salary    301
+/salary/2.8-lpa-in-hand-salary    /salary/2-8-lpa-in-hand-salary    301
+/salary/3.2-lpa-in-hand-salary    /salary/3-2-lpa-in-hand-salary    301
+/salary/3.36-lpa-in-hand-salary   /salary/3-36-lpa-in-hand-salary   301
 /salary/3.5-lpa-in-hand-salary    /salary/3-5-lpa-in-hand-salary    301
+/salary/3.6-lpa-in-hand-salary    /salary/3-6-lpa-in-hand-salary    301
+/salary/3.8-lpa-in-hand-salary    /salary/3-8-lpa-in-hand-salary    301
+/salary/4.2-lpa-in-hand-salary    /salary/4-2-lpa-in-hand-salary    301
 /salary/4.5-lpa-in-hand-salary    /salary/4-5-lpa-in-hand-salary    301
+/salary/4.8-lpa-in-hand-salary    /salary/4-8-lpa-in-hand-salary    301
+/salary/5.2-lpa-in-hand-salary    /salary/5-2-lpa-in-hand-salary    301
 /salary/5.5-lpa-in-hand-salary    /salary/5-5-lpa-in-hand-salary    301
+/salary/6.2-lpa-in-hand-salary    /salary/6-2-lpa-in-hand-salary    301
 /salary/6.5-lpa-in-hand-salary    /salary/6-5-lpa-in-hand-salary    301
+/salary/7.2-lpa-in-hand-salary    /salary/7-2-lpa-in-hand-salary    301
 /salary/7.5-lpa-in-hand-salary    /salary/7-5-lpa-in-hand-salary    301
+/salary/8.2-lpa-in-hand-salary    /salary/8-2-lpa-in-hand-salary    301
 /salary/8.5-lpa-in-hand-salary    /salary/8-5-lpa-in-hand-salary    301
+/salary/9.5-lpa-in-hand-salary    /salary/9-5-lpa-in-hand-salary    301
+/salary/10.5-lpa-in-hand-salary   /salary/10-5-lpa-in-hand-salary   301
+/salary/11.5-lpa-in-hand-salary   /salary/11-5-lpa-in-hand-salary   301
+/salary/12.5-lpa-in-hand-salary   /salary/12-5-lpa-in-hand-salary   301
+/salary/13.5-lpa-in-hand-salary   /salary/13-5-lpa-in-hand-salary   301
+/salary/14.5-lpa-in-hand-salary   /salary/14-5-lpa-in-hand-salary   301
+

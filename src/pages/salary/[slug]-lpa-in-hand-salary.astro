@@ -12,25 +12,48 @@ import { formatINR, numberToIndianWords } from '../../utils/formatCurrency';
 
 export async function getStaticPaths() {
   const lpaValues = [
+    { lpa: 1.8, slug: '1-8' },
+    { lpa: 2, slug: '2' },
+    { lpa: 2.2, slug: '2-2' },
+    { lpa: 2.4, slug: '2-4' },
     { lpa: 2.5, slug: '2-5' },
+    { lpa: 2.6, slug: '2-6' },
+    { lpa: 2.7, slug: '2-7' },
+    { lpa: 2.8, slug: '2-8' },
     { lpa: 3, slug: '3' },
+    { lpa: 3.2, slug: '3-2' },
+    { lpa: 3.36, slug: '3-36' },
     { lpa: 3.5, slug: '3-5' },
+    { lpa: 3.6, slug: '3-6' },
+    { lpa: 3.8, slug: '3-8' },
     { lpa: 4, slug: '4' },
+    { lpa: 4.2, slug: '4-2' },
     { lpa: 4.5, slug: '4-5' },
+    { lpa: 4.8, slug: '4-8' },
     { lpa: 5, slug: '5' },
+    { lpa: 5.2, slug: '5-2' },
     { lpa: 5.5, slug: '5-5' },
     { lpa: 6, slug: '6' },
+    { lpa: 6.2, slug: '6-2' },
     { lpa: 6.5, slug: '6-5' },
     { lpa: 7, slug: '7' },
+    { lpa: 7.2, slug: '7-2' },
     { lpa: 7.5, slug: '7-5' },
     { lpa: 8, slug: '8' },
+    { lpa: 8.2, slug: '8-2' },
     { lpa: 8.5, slug: '8-5' },
     { lpa: 9, slug: '9' },
+    { lpa: 9.5, slug: '9-5' },
     { lpa: 10, slug: '10' },
+    { lpa: 10.5, slug: '10-5' },
     { lpa: 11, slug: '11' },
+    { lpa: 11.5, slug: '11-5' },
     { lpa: 12, slug: '12' },
+    { lpa: 12.5, slug: '12-5' },
     { lpa: 13, slug: '13' },
+    { lpa: 13.5, slug: '13-5' },
     { lpa: 14, slug: '14' },
+    { lpa: 14.5, slug: '14-5' },
     { lpa: 15, slug: '15' },
     { lpa: 16, slug: '16' },
     { lpa: 17, slug: '17' },
@@ -133,6 +156,14 @@ const faqLd = {
   mainEntity: [
     {
       '@type': 'Question',
+      name: `What does a ${lpa} LPA package mean in monthly salary?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `A ${lpa} LPA package equates to an average gross monthly CTC of ₹${Math.round((lpa * 100000) / 12).toLocaleString('en-IN')}/month. However, your actual take-home in-hand salary deposited in your bank account is approximately ${formatINR(breakdownNew.monthlyInHand)} per month under the standard statutory wage ceiling (₹25,000/mo), ${formatINR(breakdownFull.monthlyInHand)} per month under full-basic PF, or ${formatINR(breakdownHistorical.monthlyInHand)} per month under historical pre-Sept 2026 rules after deducting Employee PF (${formatINR(breakdownNew.monthlyEmployeePF)}/mo), state Professional Tax (₹200/mo), and Income Tax TDS under the New Tax Regime (Tax Year 2026–27).`,
+      },
+    },
+    {
+      '@type': 'Question',
       name: `What is the monthly in-hand salary for ${lpa} LPA?`,
       acceptedAnswer: {
         '@type': 'Answer',
@@ -160,7 +191,11 @@ const faqLd = {
   ],
 };
 
-const allLpas = [2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 25, 28, 30, 35, 40, 50, 60, 75, 100];
+const allLpas = [
+  1.8, 2, 2.2, 2.4, 2.5, 2.6, 2.7, 2.8, 3, 3.2, 3.36, 3.5, 3.6, 3.8, 4, 4.2, 4.5, 4.8, 5, 5.2, 5.5,
+  6, 6.2, 6.5, 7, 7.2, 7.5, 8, 8.2, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5,
+  15, 16, 17, 18, 20, 22, 24, 25, 28, 30, 35, 40, 50, 60, 75, 100
+];
 const nearbyLpas = allLpas.filter((n) => n !== lpa && Math.abs(n - lpa) <= (lpa <= 10 ? 3 : lpa <= 30 ? 6 : 15)).slice(0, 8);
 
 // Eligibility calculations for Marginal Relief & Employer NPS:
@@ -279,9 +314,43 @@ const estimatedNPSSavings = Math.round(maxEmployerNPS * topMarginalRate * 1.04);
 
         <div class="card">
           <h1 class="display-sm mb-xs">{lpa} LPA In-Hand Salary Breakdown</h1>
-          <p class="body-sm text-muted mb-xl">
+          <p class="body-sm text-muted mb-lg">
             Detailed salary structure for ₹{(lpa * 100000).toLocaleString('en-IN')} annual CTC under the Income-tax Act, 2025.
           </p>
+
+          <!-- Natural Search Phrasing Callout: [X] Package Means How Much Monthly Salary? -->
+          <div class="package-means-callout mb-xl p-md bg-soft border rounded">
+            <h2 class="title-sm mb-xs">What does a {lpa} LPA package mean in monthly salary?</h2>
+            <p class="body-sm text-body mb-sm">
+              If an employer offers a <strong>{lpa} LPA package</strong> ({numberToIndianWords(annualCTC)}), simple division gives a headline gross average of <strong>{formatINR(Math.round(annualCTC / 12))} per month</strong> (₹{(annualCTC / 12).toFixed(0)}/mo).
+              However, your actual monthly in-hand bank credit is lower because Cost-to-Company (CTC) includes employer retiral overheads and requires statutory deductions:
+            </p>
+            <div class="grid-stats-4 mb-sm">
+              <div class="stat-card p-xs bg-canvas border rounded">
+                <div class="caption text-muted">Gross Monthly CTC</div>
+                <div class="font-mono text-body font-bold">{formatINR(Math.round(annualCTC / 12))} / mo</div>
+                <div class="caption text-muted mt-xxs">₹{annualCTC.toLocaleString('en-IN')} ÷ 12</div>
+              </div>
+              <div class="stat-card p-xs bg-canvas border rounded border-primary">
+                <div class="caption text-primary">In-Hand (Statutory Capped PF)</div>
+                <div class="font-mono text-success font-bold">{formatINR(breakdownNew.monthlyInHand)} / mo</div>
+                <div class="caption text-muted mt-xxs">₹25K statutory wage ceiling</div>
+              </div>
+              <div class="stat-card p-xs bg-canvas border rounded">
+                <div class="caption text-muted">In-Hand (Full-Basic PF)</div>
+                <div class="font-mono text-body font-bold">{formatINR(breakdownFull.monthlyInHand)} / mo</div>
+                <div class="caption text-muted mt-xxs">Uncapped 12% on 40% basic</div>
+              </div>
+              <div class="stat-card p-xs bg-canvas border rounded">
+                <div class="caption text-muted">In-Hand (Historical Baseline)</div>
+                <div class="font-mono text-body font-bold">{formatINR(breakdownHistorical.monthlyInHand)} / mo</div>
+                <div class="caption text-muted mt-xxs">Pre-Sep 2026 ₹15K ceiling</div>
+              </div>
+            </div>
+            <p class="body-xs text-muted mb-0">
+              * <em>Under the New Tax Regime (Tax Year 2026–27), standard deduction of ₹75,000 applies. Gratuity accrual ({formatINR(breakdownNew.gratuity.annualAccrual)}/yr) and Employer PF ({formatINR(breakdownNew.employerPF.annualEmployerPF)}/yr) are retained by the employer as benefits and are not paid out in your monthly bank credit.</em>
+            </p>
+          </div>
 
           <h2 class="title-sm mb-sm">Earnings & Cash Components</h2>
           <div class="table-container mb-lg">
@@ -529,6 +598,19 @@ const estimatedNPSSavings = Math.round(maxEmployerNPS * topMarginalRate * 1.04);
         <h3 class="title-lg mb-sm">Frequently Asked Questions</h3>
         <div class="faq-accordion mt-md">
           <details class="faq-item" open>
+            <summary class="faq-question">What does a {lpa} LPA package mean in monthly salary?</summary>
+            <div class="faq-answer">
+              <p>A <strong>{lpa} LPA package</strong> mathematically equals an average gross CTC of <strong>{formatINR(Math.round(annualCTC / 12))} per month</strong>. However, your actual take-home in-hand salary deposited into your bank account is lower due to employer retiral contributions and statutory deductions. Across the 3 provident fund scenarios:</p>
+              <ul style="margin: 8px 0 8px 20px; line-height: 1.6;">
+                <li><strong>Scenario 1 (Statutory Capped PF ₹25,000 ceiling):</strong> <strong>{formatINR(breakdownNew.monthlyInHand)} / mo</strong> ({formatINR(breakdownNew.annualInHand)}/year take-home).</li>
+                <li><strong>Scenario 2 (Full-Basic PF uncapped):</strong> <strong>{formatINR(breakdownFull.monthlyInHand)} / mo</strong> ({formatINR(breakdownFull.annualInHand)}/year take-home).</li>
+                <li><strong>Scenario 3 (Historical Baseline ₹15,000 ceiling):</strong> <strong>{formatINR(breakdownHistorical.monthlyInHand)} / mo</strong> ({formatINR(breakdownHistorical.annualInHand)}/year take-home).</li>
+              </ul>
+              <p>Payroll deductions include employee EPF ({formatINR(breakdownNew.monthlyEmployeePF)}/mo), state Professional Tax (₹200/mo), and Income Tax TDS under the New Tax Regime (Tax Year 2026–27).</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
             <summary class="faq-question">What is the monthly in-hand salary for {lpa} LPA?</summary>
             <div class="faq-answer">
               <p>Under standard corporate payroll structures in India, an employee with a {lpa} LPA CTC receives approximately <strong>{formatINR(breakdownNew.monthlyInHand)} per month</strong> in their bank account.</p>
@@ -721,4 +803,17 @@ const estimatedNPSSavings = Math.round(maxEmployerNPS * topMarginalRate * 1.04);
   .border-accent { border: 1px solid #e2b714; }
   .caption { font-size: 12px; color: var(--color-muted); }
   .nps-box { background: var(--color-surface); border: 1px solid var(--color-hairline); border-radius: var(--rounded-md); }
+
+  .package-means-callout {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-hairline);
+    border-left: 4px solid var(--color-primary);
+  }
+
+  .grid-stats-3,
+  .grid-stats-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: var(--space-sm);
+  }
 </style>
